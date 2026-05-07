@@ -1,0 +1,150 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .panel { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 20px; }
+  .label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { padding: 6px 14px; border-radius: 999px; font-size: 13px; cursor: pointer; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); transition: all 0.14s; white-space: nowrap; }
+  .chip:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+  .chip.active-cat { border-color: #185FA5; background: #E6F1FB; color: #0C447C; font-weight: 500; }
+  .chip.active-sub { border-color: #185FA5; background: #185FA5; color: #fff; font-weight: 500; }
+  .chip.active-sub .check { display: inline; }
+  .chip .check { display: none; margin-right: 4px; font-size: 10px; }
+  .sub-row { overflow: hidden; transition: max-height 0.22s ease, opacity 0.18s; max-height: 0; opacity: 0; }
+  .sub-row.open { max-height: 200px; opacity: 1; }
+  .divider { height: 0.5px; background: var(--color-border-tertiary); margin: 16px 0; }
+  .vitrine-chip { padding: 5px 12px; border-radius: 999px; font-size: 12px; cursor: pointer; border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); color: var(--color-text-secondary); transition: all 0.14s; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
+  .vitrine-chip:hover { border-color: var(--color-border-secondary); color: var(--color-text-primary); }
+  .vitrine-chip.sel { border-color: #185FA5; background: #E6F1FB; color: #0C447C; }
+  .vitrine-chip .check { display: none; font-size: 9px; }
+  .vitrine-chip.sel .check { display: inline; }
+  .badge { font-size: 10px; background: var(--color-background-tertiary); color: var(--color-text-tertiary); border-radius: 4px; padding: 1px 5px; }
+  .vitrine-chip.sel .badge { background: #B5D4F4; color: #0C447C; }
+  .summary { font-size: 12px; color: var(--color-text-secondary); margin-top: 14px; padding: 10px 14px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); }
+  .summary strong { color: var(--color-text-primary); font-weight: 500; }
+  .actions { display: flex; gap: 10px; margin-top: 8px; }
+  .action-btn { font-size: 12px; color: var(--color-text-secondary); background: none; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 4px 10px; cursor: pointer; transition: all 0.12s; }
+  .action-btn:hover { color: var(--color-text-primary); border-color: var(--color-border-secondary); }
+  .arrow { font-size: 10px; color: var(--color-text-tertiary); margin-left: 3px; transition: transform 0.18s; display: inline-block; }
+  .chip.active-cat .arrow { transform: rotate(90deg); }
+</style>
+
+<div style="padding: 1rem 0;">
+  <div class="panel">
+    <div class="label">Categoria</div>
+    <div class="chips" id="cat-chips"></div>
+
+    <div class="sub-row" id="sub-row">
+      <div style="padding-top: 14px;">
+        <div class="label">Subcategoria</div>
+        <div class="chips" id="sub-chips"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px;">
+      <div class="label" style="margin:0">Coleções disponíveis</div>
+      <div class="actions">
+        <button class="action-btn" onclick="selectAllVitrines()">Todas</button>
+        <button class="action-btn" onclick="clearVitrines()">Limpar</button>
+      </div>
+    </div>
+    <div class="chips" id="vitrine-chips"></div>
+
+    <div class="summary" id="summary"></div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  all:  { label: "Todas as categorias", subs: [], vitrines: ["Em Alta","Trilhas em Destaque","Novidades"] },
+  ia:   { label: "Inteligência Artificial", subs: [
+    { id:"ia-neg", label:"Negócios", vitrines:["IA para Negócios","Automação com IA","ChatGPT Aplicado"] },
+    { id:"ia-dev", label:"Desenvolvimento", vitrines:["IA para Devs","Engenharia de Prompts"] },
+    { id:"ia-cri", label:"Criatividade", vitrines:["IA Aplicada a Conteúdo","Design com IA"] },
+  ]},
+  prod: { label: "Produtividade", subs: [
+    { id:"prod-pes", label:"Pessoal", vitrines:["Foco e Organização","Gestão do Tempo"] },
+    { id:"prod-tme", label:"Times", vitrines:["Rotinas de Alta Performance","Reuniões Produtivas"] },
+  ]},
+  gest: { label: "Gestão", subs: [
+    { id:"gest-lid", label:"Liderança", vitrines:["Liderança e Times","Feedback e Cultura"] },
+    { id:"gest-pro", label:"Projetos", vitrines:["Gestão de Projetos","Eficiência Operacional"] },
+  ]},
+  com:  { label: "Comunicação", subs: [
+    { id:"com-cor", label:"Corporativa", vitrines:["Comunicação Corporativa","Apresentações de Impacto"] },
+    { id:"com-dig", label:"Digital", vitrines:["Presença Digital","Criação de Conteúdo"] },
+  ]},
+};
+
+let activeCategory = "all";
+let activeSub = null;
+let selectedVitrines = new Set(["Em Alta","Trilhas em Destaque"]);
+
+function getVitrines() {
+  if (activeCategory === "all") return DATA.all.vitrines;
+  if (!activeSub) return DATA[activeCategory].subs.flatMap(s => s.vitrines);
+  return DATA[activeCategory].subs.find(s => s.id === activeSub)?.vitrines || [];
+}
+
+function renderCats() {
+  const el = document.getElementById("cat-chips");
+  el.innerHTML = Object.entries(DATA).map(([id, d]) => {
+    const active = activeCategory === id;
+    return `<button class="chip${active?" active-cat":""}" onclick="selectCat('${id}')">${d.label}${id!=="all"?`<span class="arrow">›</span>`:""}</button>`;
+  }).join("");
+}
+
+function renderSubs() {
+  const row = document.getElementById("sub-row");
+  const el = document.getElementById("sub-chips");
+  if (activeCategory === "all" || !DATA[activeCategory].subs.length) {
+    row.classList.remove("open"); return;
+  }
+  const subs = DATA[activeCategory].subs;
+  el.innerHTML = `<button class="chip${!activeSub?" active-cat":""}" onclick="selectSub(null)">Todas</button>` +
+    subs.map(s => `<button class="chip${activeSub===s.id?" active-cat":""}" onclick="selectSub('${s.id}')">${s.label}</button>`).join("");
+  row.classList.add("open");
+}
+
+function renderVitrines() {
+  const vitrines = getVitrines();
+  const el = document.getElementById("vitrine-chips");
+  el.innerHTML = vitrines.map(v => {
+    const sel = selectedVitrines.has(v);
+    return `<button class="vitrine-chip${sel?" sel":""}" onclick="toggleVitrine('${v}')"><span class="check">✓</span>${v}<span class="badge">${Math.floor(Math.random()*4)+3}</span></button>`;
+  }).join("");
+  renderSummary();
+}
+
+function renderSummary() {
+  const el = document.getElementById("summary");
+  const n = selectedVitrines.size;
+  if (n === 0) { el.innerHTML = `<span style="color:var(--color-text-tertiary)">Nenhuma coleção selecionada — a vitrine ficará vazia.</span>`; return; }
+  const names = [...selectedVitrines].slice(0,2).join(", ");
+  const more = n > 2 ? ` e mais ${n-2}` : "";
+  el.innerHTML = `<strong>${n} coleção(ões) ativa(s):</strong> ${names}${more}`;
+}
+
+function selectCat(id) {
+  activeCategory = id; activeSub = null;
+  renderCats(); renderSubs(); renderVitrines();
+}
+function selectSub(id) {
+  activeSub = id; renderSubs(); renderVitrines();
+}
+function toggleVitrine(v) {
+  selectedVitrines.has(v) ? selectedVitrines.delete(v) : selectedVitrines.add(v);
+  renderVitrines();
+}
+function selectAllVitrines() {
+  getVitrines().forEach(v => selectedVitrines.add(v)); renderVitrines();
+}
+function clearVitrines() {
+  getVitrines().forEach(v => selectedVitrines.delete(v)); renderVitrines();
+}
+
+renderCats(); renderSubs(); renderVitrines();
+</script>
