@@ -319,31 +319,44 @@ const Topbar = ({
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-100 shadow-sm">
-      <div className="flex items-center h-full px-4 gap-3">
-        {/* Hamburger - mobile only */}
-        <button
-          onClick={onMenuToggle}
-          className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors lg:hidden flex-shrink-0"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-100">
+      <div className="flex h-full">
 
-        {/* Logo - mobile only (desktop has it in sidebar) */}
-        <div className="lg:hidden flex-shrink-0 cursor-pointer" onClick={() => setActiveTab('Conteúdo')}>
-          <img src={logoLector} alt="Lector" className="h-9 w-auto" />
+        {/* ── Brand zone: alinha com o sidebar (desktop) ── */}
+        <div className="hidden lg:flex items-center px-5 w-64 flex-shrink-0 border-r border-gray-100">
+          <img
+            src={logoLector}
+            alt="Lector"
+            className="h-8 w-auto cursor-pointer hover:opacity-75 transition-opacity"
+            onClick={() => setActiveTab('Conteúdo')}
+          />
         </div>
 
-        {/* Search */}
-        <div ref={searchRef} className="relative flex-1 max-w-sm">
-          <input
-            type="text"
-            placeholder="Pesquisar..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-gray-100 border-transparent focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary rounded-full text-sm transition-all duration-300"
-          />
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+        {/* ── Content zone: alinha com a área principal ── */}
+        <div className="flex items-center flex-1 px-4 lg:px-6 gap-3 min-w-0">
+          {/* Hamburger - mobile only */}
+          <button
+            onClick={onMenuToggle}
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors lg:hidden flex-shrink-0"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+
+          {/* Logo - mobile only */}
+          <div className="lg:hidden flex-shrink-0 cursor-pointer" onClick={() => setActiveTab('Conteúdo')}>
+            <img src={logoLector} alt="Lector" className="h-8 w-auto" />
+          </div>
+
+          {/* Search */}
+          <div ref={searchRef} className="relative flex-1 max-w-md">
+            <input
+              type="text"
+              placeholder="Pesquisar cursos, trilhas..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-gray-100/80 border border-transparent focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary/30 rounded-full text-sm transition-all duration-200 placeholder:text-gray-400"
+            />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
           <AnimatePresence>
             {suggestions.length > 0 && (
               <motion.div
@@ -447,6 +460,7 @@ const Topbar = ({
           </div>
         </div>
       </div>
+    </div>
     </header>
   );
 };
@@ -512,20 +526,10 @@ const Sidebar = ({
           </button>
         </div>
 
-        {/* Desktop logo */}
-        <div className="hidden lg:flex items-center px-5 py-4 border-b border-gray-100 flex-shrink-0">
-          <img
-            src={logoLector}
-            alt="Lector"
-            className="h-9 w-auto cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => setActiveTab('Conteúdo')}
-          />
-        </div>
-
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto py-4 px-3">
-          {/* VITRINES */}
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 mb-2">Vitrines</p>
+          {/* Vitrines label */}
+          <p className="text-[11px] font-semibold text-gray-400 px-2 mb-2 tracking-wide">Vitrines</p>
           <div className="relative mb-2">
             <input
               type="text"
@@ -542,7 +546,7 @@ const Sidebar = ({
           )}
           {categorias.map(cat => (
             <div key={cat} className="mb-1">
-              <p className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 mb-0.5 ${CATEGORIA_COR[cat] ?? 'text-gray-400'}`}>{cat}</p>
+              <p className={`text-[10px] font-medium px-2 py-0.5 mb-0.5 ${CATEGORIA_COR[cat] ?? 'text-gray-400'}`}>{cat}</p>
               {vitrineFiltradas.filter(v => v.categoria === cat).map(vitrine => {
                 const isActive = vitrine.id === activeVitrineId;
                 return (
@@ -573,16 +577,15 @@ const Sidebar = ({
 
           <div className="h-px bg-gray-100 mx-1 my-3" />
 
-          {/* NAVEGAÇÃO */}
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 mb-1">Navegação</p>
+          <p className="text-[11px] font-semibold text-gray-400 px-2 mb-1 tracking-wide">Menu</p>
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => handleNavClick(id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 activeTab === id
-                  ? 'bg-brand-primary/10 text-brand-primary'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-brand-primary/8 text-brand-primary'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
               }`}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
