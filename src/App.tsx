@@ -1996,20 +1996,28 @@ const MyAreaCalendario = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {selectedEvents.map(ev => (
-                <div key={ev.id} className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                  <span className="text-lg leading-none mt-0.5">{eventTypeIcon[ev.type]}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-800 leading-tight">{ev.title}</p>
-                    {ev.time !== '—' && (
-                      <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {ev.time}
-                      </p>
-                    )}
+              {selectedEvents.map(ev => {
+                const isOnline = ev.type === 'aula' || ev.type === 'webinar';
+                return (
+                  <div key={ev.id} className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                    <span className="text-lg leading-none mt-0.5">{eventTypeIcon[ev.type]}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 leading-tight">{ev.title}</p>
+                      {ev.time !== '—' && (
+                        <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {ev.time}
+                        </p>
+                      )}
+                      {isOnline && (
+                        <button className="mt-2 flex items-center gap-1.5 bg-brand-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity shadow-sm">
+                          <Play className="w-3 h-3" fill="currentColor" /> Acessar
+                        </button>
+                      )}
+                    </div>
+                    <div className="w-1 h-full min-h-[32px] rounded-full flex-shrink-0" style={{ backgroundColor: ev.color }} />
                   </div>
-                  <div className="w-1 h-full min-h-[32px] rounded-full flex-shrink-0" style={{ backgroundColor: ev.color }} />
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
