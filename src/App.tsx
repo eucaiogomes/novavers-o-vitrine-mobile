@@ -518,6 +518,23 @@ const Navbar = ({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: 
   );
 };
 
+type StorySegment = { type: 'image' | 'video'; url: string };
+type Story = { id: number; user: { id: number; name: string; role: string; avatar: string }; segments: StorySegment[]; viewed: boolean };
+
+const STORY_USERS = [
+  { id: 1, name: 'Lia do RH', role: 'Recursos Humanos', avatar: 'https://ui-avatars.com/api/?name=Lia+RH&background=F3E8FF&color=9333EA' },
+  { id: 2, name: 'Patrick', role: 'Engenharia de Software', avatar: 'https://ui-avatars.com/api/?name=Patrick&background=DBEAFE&color=2563EB' },
+  { id: 3, name: 'Carla', role: 'Marketing', avatar: 'https://ui-avatars.com/api/?name=Carla&background=FCE7F3&color=DB2777' },
+  { id: 4, name: 'Serginho', role: 'Vendas', avatar: 'https://ui-avatars.com/api/?name=Serginho&background=FEF3C7&color=D97706' },
+];
+
+const INITIAL_STORIES: Story[] = [
+  { id: 1, user: STORY_USERS[0], viewed: false, segments: [{ type: 'image', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500&h=890&fit=crop' }] },
+  { id: 2, user: STORY_USERS[1], viewed: false, segments: [{ type: 'image', url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=500&h=890&fit=crop' }, { type: 'image', url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=500&h=890&fit=crop' }] },
+  { id: 3, user: STORY_USERS[2], viewed: false, segments: [{ type: 'image', url: 'https://images.unsplash.com/photo-1552581234-26160f608093?w=500&h=890&fit=crop' }] },
+  { id: 4, user: STORY_USERS[3], viewed: false, segments: [{ type: 'image', url: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=500&h=890&fit=crop' }] },
+];
+
 const SocialView = () => {
   const [activeProfile, setActiveProfile] = useState<any | null>(null);
   const [likedPosts, setLikedPosts] = useState<number[]>([]);
@@ -528,26 +545,130 @@ const SocialView = () => {
   const scrollStory = (dir: 'left' | 'right') => storyRef.current?.scrollBy({ left: dir === 'right' ? 140 : -140, behavior: 'smooth' });
   const scrollBday = (dir: 'left' | 'right') => bdayRef.current?.scrollBy({ left: dir === 'right' ? 200 : -200, behavior: 'smooth' });
 
-  const toggleLike = (id: number) => {
-    if (likedPosts.includes(id)) {
-      setLikedPosts(likedPosts.filter(pId => pId !== id));
-    } else {
-      setLikedPosts([...likedPosts, id]);
+  // ── Stories ──────────────────────────────────────────────────────
+  const [stories, setStories] = useState<Story[]>(INITIAL_STORIES);
+
+  // Recorder
+  const [recorderOpen, setRecorderOpen] = useState(false);
+  const [recState, setRecState] = useState<'idle' | 'recording' | 'review'>('idle');
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+  const [recordSeconds, setRecordSeconds] = useState(0);
+  const MAX_REC = 15;
+  const cameraRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (!recorderOpen) {
+      streamRef.current?.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+      if (recTimerRef.current) clearInterval(recTimerRef.current);
+      return;
     }
+    setRecState('idle');
+    setRecordedUrl(null);
+    setRecordSeconds(0);
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true })
+      .then(stream => {
+        streamRef.current = stream;
+        if (cameraRef.current) { cameraRef.current.srcObject = stream; cameraRef.current.play(); }
+      })
+      .catch(() => setRecorderOpen(false));
+    return () => { streamRef.current?.getTracks().forEach(t => t.stop()); if (recTimerRef.current) clearInterval(recTimerRef.current); };
+  }, [recorderOpen]);
+
+  const startRecording = () => {
+    if (!streamRef.current) return;
+    chunksRef.current = [];
+    const mr = new MediaRecorder(streamRef.current, { mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm' });
+    mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+    mr.onstop = () => {
+      const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+      setRecordedUrl(URL.createObjectURL(blob));
+      setRecState('review');
+    };
+    mr.start(100);
+    recorderRef.current = mr;
+    setRecState('recording');
+    let secs = 0;
+    recTimerRef.current = setInterval(() => {
+      secs++;
+      setRecordSeconds(secs);
+      if (secs >= MAX_REC) stopRecording();
+    }, 1000);
   };
 
-  const toggleComments = (id: number) => {
-    setExpandedComments(prev => 
-      prev.includes(id) ? prev.filter(pId => pId !== id) : [...prev, id]
-    );
+  const stopRecording = () => {
+    if (recTimerRef.current) clearInterval(recTimerRef.current);
+    recorderRef.current?.stop();
   };
 
-  const users = [
-    { id: 1, name: 'Lia do RH', role: 'Recursos Humanos', avatar: 'https://ui-avatars.com/api/?name=Lia+RH&background=F3E8FF&color=9333EA' },
-    { id: 2, name: 'Patrick', role: 'Engenharia de Software', avatar: 'https://ui-avatars.com/api/?name=Patrick&background=DBEAFE&color=2563EB' },
-    { id: 3, name: 'Carla', role: 'Marketing', avatar: 'https://ui-avatars.com/api/?name=Carla&background=FCE7F3&color=DB2777' },
-    { id: 4, name: 'Serginho', role: 'Vendas', avatar: 'https://ui-avatars.com/api/?name=Serginho&background=FEF3C7&color=D97706' },
-  ];
+  const publishStory = () => {
+    if (!recordedUrl) return;
+    const me = { id: 0, name: 'Caio Gomes', role: 'Você', avatar: 'https://ui-avatars.com/api/?name=Caio+Gomes&background=FF7A1A&color=fff' };
+    setStories(prev => {
+      const idx = prev.findIndex(s => s.id === 0);
+      if (idx !== -1) return prev.map(s => s.id === 0 ? { ...s, segments: [...s.segments, { type: 'video' as const, url: recordedUrl }], viewed: false } : s);
+      return [{ id: 0, user: me, segments: [{ type: 'video' as const, url: recordedUrl }], viewed: false }, ...prev];
+    });
+    setRecorderOpen(false);
+  };
+
+  // Viewer
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerStoryIdx, setViewerStoryIdx] = useState(0);
+  const [viewerSegIdx, setViewerSegIdx] = useState(0);
+  const [segProgress, setSegProgress] = useState(0);
+  const viewerVideoRef = useRef<HTMLVideoElement>(null);
+  const segTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const clearSegTimer = () => { if (segTimerRef.current) { clearInterval(segTimerRef.current); segTimerRef.current = null; } };
+
+  const advanceSegment = (sIdx: number, stIdx: number, allStories: Story[]) => {
+    const story = allStories[stIdx];
+    if (!story) { setViewerOpen(false); return; }
+    if (sIdx < story.segments.length - 1) { setViewerSegIdx(sIdx + 1); setSegProgress(0); }
+    else if (stIdx < allStories.length - 1) { setViewerStoryIdx(stIdx + 1); setViewerSegIdx(0); setSegProgress(0); }
+    else setViewerOpen(false);
+  };
+
+  const goNext = () => { clearSegTimer(); advanceSegment(viewerSegIdx, viewerStoryIdx, stories); };
+  const goPrev = () => {
+    clearSegTimer();
+    if (viewerSegIdx > 0) { setViewerSegIdx(i => i - 1); setSegProgress(0); }
+    else if (viewerStoryIdx > 0) { setViewerStoryIdx(i => i - 1); setViewerSegIdx(0); setSegProgress(0); }
+  };
+
+  const openViewer = (idx: number) => {
+    setViewerStoryIdx(idx); setViewerSegIdx(0); setSegProgress(0); setViewerOpen(true);
+    setStories(prev => prev.map((s, i) => i === idx ? { ...s, viewed: true } : s));
+  };
+
+  useEffect(() => {
+    if (!viewerOpen) { clearSegTimer(); return; }
+    const story = stories[viewerStoryIdx];
+    if (!story) return;
+    const seg = story.segments[viewerSegIdx];
+    if (!seg) return;
+    clearSegTimer();
+    setSegProgress(0);
+    if (seg.type === 'image') {
+      const duration = 5000;
+      const step = 50;
+      let elapsed = 0;
+      segTimerRef.current = setInterval(() => {
+        elapsed += step;
+        setSegProgress((elapsed / duration) * 100);
+        if (elapsed >= duration) { clearSegTimer(); advanceSegment(viewerSegIdx, viewerStoryIdx, stories); }
+      }, step);
+    }
+    return clearSegTimer;
+  }, [viewerOpen, viewerStoryIdx, viewerSegIdx]);
+
+  // ── Feed data ──────────────────────────────────────────────────────
+  const users = STORY_USERS;
 
   const initialPosts = [
     {
@@ -637,22 +758,22 @@ const SocialView = () => {
             </button>
             <div ref={storyRef} className="flex items-end gap-4 overflow-x-hidden pb-1" style={{ scrollbarWidth: 'none' }}>
               {/* Botão novo Story */}
-              <button className="flex flex-col items-center gap-1.5 group flex-shrink-0">
+              <button onClick={() => setRecorderOpen(true)} className="flex flex-col items-center gap-1.5 group flex-shrink-0">
                 <div className="w-12 h-12 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center group-hover:border-brand-primary/60 transition-colors">
                   <Plus className="w-5 h-5 text-white/40 group-hover:text-brand-primary/80 transition-colors" />
                 </div>
                 <span className="text-white/50 text-[10px] font-medium whitespace-nowrap group-hover:text-white/70 transition-colors">Novo</span>
               </button>
-              {users.map(user => (
+              {stories.map((story, idx) => (
                 <button
-                  key={user.id}
-                  onClick={() => setActiveProfile(user)}
+                  key={story.id}
+                  onClick={() => openViewer(idx)}
                   className="flex flex-col items-center gap-1.5 group flex-shrink-0"
                 >
-                  <div className="w-12 h-12 rounded-full p-[2px] bg-gradient-to-br from-brand-primary to-orange-300 group-hover:scale-105 transition-transform">
-                    <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full border-2 border-[#041433]" />
+                  <div className={`w-12 h-12 rounded-full p-[2px] group-hover:scale-105 transition-transform ${story.viewed ? 'bg-white/20' : 'bg-gradient-to-br from-brand-primary to-orange-300'}`}>
+                    <img src={story.user.avatar} alt={story.user.name} className="w-full h-full rounded-full border-2 border-[#041433]" />
                   </div>
-                  <span className="text-white/70 text-[10px] font-medium whitespace-nowrap group-hover:text-white transition-colors">{user.name.split(' ')[0]}</span>
+                  <span className="text-white/70 text-[10px] font-medium whitespace-nowrap group-hover:text-white transition-colors">{story.user.name.split(' ')[0]}</span>
                 </button>
               ))}
             </div>
@@ -863,6 +984,169 @@ const SocialView = () => {
           );
         })}
       </div>
+
+      {/* ── STORY RECORDER ──────────────────────────────────────── */}
+      <AnimatePresence>
+        {recorderOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] bg-black flex flex-col items-center justify-center"
+          >
+            {/* Header */}
+            <div className="absolute top-0 inset-x-0 flex items-center justify-between px-5 pt-5 z-10">
+              <span className="text-white font-bold text-lg" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                {recState === 'review' ? 'Seu Story' : 'Novo Story'}
+              </span>
+              <button onClick={() => setRecorderOpen(false)} className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Camera / Review */}
+            <div className="relative w-full max-w-sm aspect-[9/16] bg-gray-900 rounded-2xl overflow-hidden">
+              {recState !== 'review' && (
+                <video ref={cameraRef} autoPlay muted playsInline className="w-full h-full object-cover scale-x-[-1]" />
+              )}
+              {recState === 'review' && recordedUrl && (
+                <video src={recordedUrl} autoPlay loop playsInline className="w-full h-full object-cover scale-x-[-1]" />
+              )}
+
+              {/* Recording progress bar */}
+              {recState === 'recording' && (
+                <div className="absolute top-0 inset-x-0 h-1 bg-white/20">
+                  <motion.div
+                    className="h-full bg-brand-primary"
+                    animate={{ width: `${(recordSeconds / MAX_REC) * 100}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+              )}
+              {recState === 'recording' && (
+                <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  {MAX_REC - recordSeconds}s
+                </div>
+              )}
+            </div>
+
+            {/* Controls */}
+            <div className="mt-8 flex flex-col items-center gap-4">
+              {recState === 'idle' && (
+                <button
+                  onClick={startRecording}
+                  className="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center hover:scale-105 transition-transform active:scale-95"
+                >
+                  <span className="w-10 h-10 rounded-full bg-red-500 block" />
+                </button>
+              )}
+              {recState === 'recording' && (
+                <button
+                  onClick={stopRecording}
+                  className="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center hover:scale-105 transition-transform active:scale-95"
+                >
+                  <span className="w-6 h-6 rounded bg-white block" />
+                </button>
+              )}
+              {recState === 'review' && (
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => { setRecState('idle'); setRecordedUrl(null); setRecordSeconds(0); }}
+                    className="px-6 py-2.5 rounded-full border border-white/40 text-white text-sm font-medium hover:bg-white/10 transition"
+                  >
+                    Gravar de novo
+                  </button>
+                  <button
+                    onClick={publishStory}
+                    className="px-6 py-2.5 rounded-full bg-brand-primary text-white text-sm font-bold hover:opacity-90 transition shadow-lg"
+                  >
+                    Publicar Story
+                  </button>
+                </div>
+              )}
+              {recState === 'idle' && (
+                <p className="text-white/40 text-xs">Toque para gravar · máximo {MAX_REC}s</p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── STORY VIEWER ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {viewerOpen && stories[viewerStoryIdx] && (() => {
+          const story = stories[viewerStoryIdx];
+          const seg = story.segments[viewerSegIdx];
+          return (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[80] bg-black flex items-center justify-center"
+            >
+              {/* Tap zones */}
+              <div className="absolute inset-0 flex z-10">
+                <div className="flex-1 cursor-pointer" onClick={goPrev} />
+                <div className="flex-1 cursor-pointer" onClick={goNext} />
+              </div>
+
+              {/* Story content */}
+              <div className="relative w-full max-w-sm h-full max-h-[100dvh] flex flex-col">
+                {seg.type === 'image' && (
+                  <img src={seg.url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                )}
+                {seg.type === 'video' && (
+                  <video
+                    ref={viewerVideoRef}
+                    src={seg.url}
+                    autoPlay
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover scale-x-[-1]"
+                    onEnded={goNext}
+                    onTimeUpdate={e => {
+                      const v = e.currentTarget;
+                      if (v.duration) setSegProgress((v.currentTime / v.duration) * 100);
+                    }}
+                  />
+                )}
+
+                {/* Gradient top overlay */}
+                <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
+                {/* Gradient bottom overlay */}
+                <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+
+                {/* Progress bars */}
+                <div className="relative z-20 flex gap-1 px-3 pt-3">
+                  {story.segments.map((_, i) => (
+                    <div key={i} className="flex-1 h-[3px] rounded-full bg-white/30 overflow-hidden">
+                      <motion.div
+                        className="h-full bg-white rounded-full"
+                        animate={{ width: i < viewerSegIdx ? '100%' : i === viewerSegIdx ? `${segProgress}%` : '0%' }}
+                        transition={{ duration: 0.05 }}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* User info */}
+                <div className="relative z-20 flex items-center justify-between px-4 pt-3 pb-2">
+                  <div className="flex items-center gap-3">
+                    <img src={story.user.avatar} alt={story.user.name} className="w-9 h-9 rounded-full border-2 border-white/60 shadow" />
+                    <div>
+                      <p className="text-white font-bold text-sm leading-tight">{story.user.name}</p>
+                      <p className="text-white/60 text-[11px]">{story.user.role}</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setViewerOpen(false)} className="p-1.5 rounded-full bg-black/30 hover:bg-black/50 text-white transition z-30 relative">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
 
       {/* MODAL DE PERFIL */}
       <AnimatePresence>
