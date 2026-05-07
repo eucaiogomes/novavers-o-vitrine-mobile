@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from '@tanstack/react-router';
 import { 
@@ -51,7 +51,8 @@ import {
   MoreHorizontal,
   Send,
   ShoppingBag,
-  ChevronDown
+  ChevronDown,
+  Plus
 } from 'lucide-react';
 import heroYoungProfessional from './assets/hero-young-professional.jpg';
 import logoLector from './assets/logo-lector.svg';
@@ -238,6 +239,100 @@ const SECTIONS: Section[] = [
       description: 'Desenvolva disciplina operacional, ownership e foco em metas organizacionais.',
       duration: '6h 55min', price: 'R$ 139,90' },
   ] },
+  { id: 'qa1', title: 'Treinamentos QA em Alta', variant: 'avancado-1', items: [
+    { id: 'qa1-0', type: 'COURSE', thumb: course01, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Introdução ao QA na Lector Live',
+      description: 'Visão geral do papel do QA, responsabilidades do time e como o trabalho se integra ao ciclo de desenvolvimento.',
+      duration: '1h 30min', price: '' },
+    { id: 'qa1-1', type: 'COURSE', thumb: course02, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Tipos de Tarefas: Correções e Implementações',
+      description: 'Entenda a diferença entre validar um bug corrigido e testar uma funcionalidade nova do início ao fim.',
+      duration: '1h 15min', price: '' },
+    { id: 'qa1-2', type: 'COURSE', thumb: course03, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Fluxo de Liberação: HML e Produção',
+      description: 'Passo a passo do processo de liberação: como o QA atua em cada etapa desde o recebimento até a aprovação em produção.',
+      duration: '1h 45min', price: '' },
+    { id: 'qa1-3', type: 'COURSE', thumb: course04, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Gerenciando o Painel de Liberações',
+      description: 'Como usar e manter o painel atualizado: colunas, status das tarefas e consistência com os grupos de comunicação.',
+      duration: '1h 00min', price: '' },
+    { id: 'qa1-4', type: 'COURSE', thumb: course05, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Executando o Checklist Completo do Sistema',
+      description: 'Como distribuir e executar o checklist após cada liberação, com foco em Trilhas, Treinamentos e Vitrines.',
+      duration: '2h 00min', price: '' },
+    { id: 'qa1-5', type: 'COURSE', thumb: course06, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Documentando Chamados Corretamente',
+      description: 'Estrutura completa de um chamado: descrição, passo a passo, evidências, ambiente, versão e campos do painel lateral.',
+      duration: '1h 30min', price: '' },
+    { id: 'qa1-6', type: 'COURSE', thumb: course07, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Regras de Reprovação e Aprovação em HML',
+      description: 'Critérios claros para reprovar ou aprovar tarefas, o que fazer com bugs adicionais e como documentar cada decisão.',
+      duration: '1h 20min', price: '' },
+    { id: 'qa1-7', type: 'COURSE', thumb: course08, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Comunicação no Time: Grupos e Alinhamento',
+      description: 'Como usar o Grupo Liberações e o Grupo Suporte Interno para manter informações alinhadas entre painel e canais.',
+      duration: '0h 45min', price: '' },
+    { id: 'qa1-8', type: 'COURSE', thumb: course09, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Boas Práticas e Critérios de Qualidade',
+      description: 'Como priorizar testes, avaliar impacto, testar fluxos relacionados e garantir que nenhuma tarefa seja aprovada sem certeza.',
+      duration: '2h 10min', price: '' },
+    { id: 'qa1-9', type: 'COURSE', thumb: course10, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Automação de Testes: Fundamentos e Boas Práticas',
+      description: 'Quando e o que automatizar, como estruturar testes independentes e manter a suíte atualizada a cada liberação.',
+      duration: '3h 00min', price: '' },
+    { id: 'qa1-10', type: 'COURSE', thumb: course11, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Criação e Manutenção de Manuais da Plataforma',
+      description: 'Como revisar, atualizar e garantir que os manuais reflitam o comportamento atual do sistema após cada liberação.',
+      duration: '1h 40min', price: '' },
+  ] },
+
+  { id: 'qt1', title: 'Trilhas QA em Destaque', variant: 'avancado-1', items: [
+    { id: 'qt1-0', type: 'TRAIL', thumb: trail01, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Trilha Onboarding QA Lector',
+      description: 'Percurso completo de entrada no time de QA: cultura, processos, ferramentas e primeiros testes.',
+      duration: '6h 30min', price: '' },
+    { id: 'qt1-1', type: 'TRAIL', thumb: trail02, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Trilha Validação de Fluxos Críticos',
+      description: 'Aprenda a testar os fluxos de maior impacto: login, matrícula, pagamento, trilhas e progresso do usuário.',
+      duration: '8h 00min', price: '' },
+    { id: 'qt1-2', type: 'TRAIL', thumb: trail03, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Trilha Gestão do Painel e Chamados',
+      description: 'Domine o painel de liberações e a documentação de chamados para manter o processo sem gargalos.',
+      duration: '5h 00min', price: '' },
+    { id: 'qt1-3', type: 'TRAIL', thumb: trail04, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Trilha Checklist Completo do Sistema',
+      description: 'Construa e execute o checklist de todas as abas do sistema com foco em Trilhas, Treinamentos e Vitrines.',
+      duration: '7h 30min', price: '' },
+    { id: 'qt1-4', type: 'TRAIL', thumb: trail05, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Trilha Automação de Testes na Lector',
+      description: 'Do zero à suíte automatizada: fluxos críticos, seletores estáveis, comandos reutilizáveis e manutenção contínua.',
+      duration: '10h 00min', price: '' },
+    { id: 'qt1-5', type: 'TRAIL', thumb: trail06, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Trilha Documentação e Manuais da Plataforma',
+      description: 'Como criar, revisar e distribuir manuais claros que acompanham cada liberação do sistema.',
+      duration: '4h 30min', price: '' },
+    { id: 'qt1-6', type: 'TRAIL', thumb: trail07, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Trilha Testes por Perfil de Usuário',
+      description: 'Valide o comportamento separado de alunos, administradores e gestores do início ao fim do fluxo.',
+      duration: '6h 00min', price: '' },
+    { id: 'qt1-7', type: 'TRAIL', thumb: trail08, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Trilha Comunicação e Alinhamento de Time',
+      description: 'Boas práticas de uso dos grupos de WhatsApp, atualização de painel e consistência de informações.',
+      duration: '3h 00min', price: '' },
+    { id: 'qt1-8', type: 'TRAIL', thumb: trail09, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Trilha Priorização e Gestão de Tarefas QA',
+      description: 'Como organizar o dia, priorizar demandas críticas e garantir que nenhuma tarefa fique sem validação.',
+      duration: '5h 30min', price: '' },
+    { id: 'qt1-9', type: 'TRAIL', thumb: trail10, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Trilha Prevenção de Regressão',
+      description: 'Identifique padrões de erro recorrentes, documente como padrão e implemente testes para evitar que se repitam.',
+      duration: '7h 00min', price: '' },
+    { id: 'qt1-10', type: 'TRAIL', thumb: trail11, authors: 'Time QA Lector', progress: 0, grade: 0,
+      title: 'Trilha Qualidade em Produção',
+      description: 'Rotina pós-liberação em produção: como agir rápido diante de falhas, acionar o time e documentar o ocorrido.',
+      duration: '4h 00min', price: '' },
+  ] },
+
   { id: 'a2', title: 'Avançado 2', variant: 'avancado-2', items: generateItems(11, 'a2') },
   { id: 'a3', title: 'Avançado 3', variant: 'avancado-3', items: generateItems(11, 'a3') },
   { id: 'a4', title: 'Avançado 4', variant: 'avancado-4', items: generateItems(11, 'a4') },
@@ -246,303 +341,592 @@ const SECTIONS: Section[] = [
   { id: 'a7', title: 'Avançado 7 (Pôster)', variant: 'avancado-7', items: generateItems(11, 'a7') },
 ];
 
+// --- Vitrine Switcher Data ---
+
+interface Vitrine {
+  id: string;
+  nome: string;
+  descricao: string;
+  categoria: string;
+  cor: string;
+}
+
+const VITRINES: Vitrine[] = [
+  { id: 'v1', nome: 'Vitrine Padrão',          descricao: 'Portal corporativo principal',          categoria: 'Corporativo', cor: '#FF7A1A' },
+  { id: 'v2', nome: 'Vitrine RH',              descricao: 'Treinamentos para equipe de RH',        categoria: 'Corporativo', cor: '#2563EB' },
+  { id: 'v3', nome: 'Vitrine Onboarding',      descricao: 'Integração de novos colaboradores',    categoria: 'Corporativo', cor: '#EC4899' },
+  { id: 'v4', nome: 'Vitrine IA & Automação',  descricao: 'Cursos de IA e ferramentas digitais',  categoria: 'Produtos',    cor: '#8B5CF6' },
+  { id: 'v5', nome: 'Vitrine Liderança',       descricao: 'Desenvolvimento de líderes',           categoria: 'Produtos',    cor: '#10B981' },
+  { id: 'v6', nome: 'Vitrine Empresa X',       descricao: 'Portal exclusivo — Empresa X',         categoria: 'Clientes',    cor: '#F59E0B' },
+  { id: 'v7', nome: 'Vitrine QA',              descricao: 'Biblioteca de QA — Lector Live',       categoria: 'QA',          cor: '#0EA5E9' },
+];
+
+const CATEGORIA_COR: Record<string, string> = {
+  Corporativo: 'bg-blue-50 text-blue-700',
+  Produtos:    'bg-purple-50 text-purple-700',
+  Clientes:    'bg-amber-50 text-amber-700',
+  QA:          'bg-sky-50 text-sky-600',
+};
+
+const VITRINE_SECTIONS: Record<string, string[]> = {
+  v1: ['a1', 't1'],
+  v2: ['a1', 't1'],
+  v3: ['a1', 't1'],
+  v4: ['a1', 't1'],
+  v5: ['a1', 't1'],
+  v6: ['a1', 't1'],
+  v7: ['qa1', 'qt1'],
+};
+
 // --- Components ---
 
-const Navbar = ({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (tab: string) => void }) => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+// ============================================================
+// TOPBAR
+// ============================================================
+const Topbar = ({
+  onMenuToggle,
+  setActiveTab,
+}: {
+  onMenuToggle: () => void;
+  setActiveTab: (tab: string) => void;
+}) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMinhaAreaOpen, setIsMinhaAreaOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<ContentItem[]>([]);
-
   const navItems = ['Minha Área', 'Social'];
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (searchQuery.trim().length > 1) {
-      const allItems = SECTIONS.flatMap(section => section.items);
-      const filtered = allItems.filter(item => 
-        item.title.toLowerCase().includes(searchQuery.toLowerCase())
-      ).slice(0, 5); // Limit to 5 suggestions
+      const allItems = SECTIONS.flatMap(s => s.items);
+      const filtered = allItems
+        .filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
+        .slice(0, 5);
       setSuggestions(filtered);
     } else {
       setSuggestions([]);
     }
   }, [searchQuery]);
 
+  // Close user menu and suggestions on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSuggestions([]);
+        setSearchQuery('');
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm w-full">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="flex justify-between h-16 items-center w-full">
-          {/* LOGO - Left aligned */}
-          <div className="flex items-center flex-1">
-            <div className="flex-shrink-0 flex items-center cursor-pointer group" onClick={() => setActiveTab('Conteúdo')}>
-              <img src={logoLector} alt="Lector" className="h-10 w-auto group-hover:scale-105 transition-transform duration-200" />
-            </div>
-          </div>
-          
-          {/* MENU TABS - Center aligned */}
-          <div className="hidden md:flex flex-none items-center justify-center space-x-2">
-            {navItems.map((item) => (
-              <button
-                key={item}
-                onClick={() => setActiveTab(item)}
-                className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 relative ${
-                  activeTab === item 
-                    ? 'text-brand-primary' 
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                {item}
-                {activeTab === item && (
-                  <motion.div 
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-brand-primary/10 rounded-full -z-10"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-              </button>
-            ))}
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-100">
+      <div className="flex h-full">
+
+        {/* ── Brand zone: alinha com o sidebar (desktop) ── */}
+        <div className="hidden lg:flex items-center px-5 w-64 flex-shrink-0 border-r border-gray-100">
+          <img
+            src={logoLector}
+            alt="Lector"
+            className="h-8 w-auto cursor-pointer hover:opacity-75 transition-opacity"
+            onClick={() => setActiveTab('Conteúdo')}
+          />
+        </div>
+
+        {/* ── Content zone: alinha com a área principal ── */}
+        <div className="flex items-center flex-1 px-4 lg:px-6 gap-3 min-w-0">
+          {/* Hamburger - mobile only */}
+          <button
+            onClick={onMenuToggle}
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors lg:hidden flex-shrink-0"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+
+          {/* Logo - mobile only */}
+          <div className="lg:hidden flex-shrink-0 cursor-pointer" onClick={() => setActiveTab('Conteúdo')}>
+            <img src={logoLector} alt="Lector" className="h-8 w-auto" />
           </div>
 
-          {/* SEARCH & ACTIONS - Right aligned */}
-          <div className="hidden md:flex items-center gap-4 flex-1 justify-end">
-            <div className="relative group">
-              <input 
-                type="text" 
-                placeholder="Pesquisar..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-gray-100 border-transparent focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary rounded-full text-sm transition-all duration-300 w-48 lg:w-64"
-              />
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400 group-focus-within:text-brand-primary transition-colors" />
-              
-              {/* Search Suggestions Dropdown */}
-              <AnimatePresence>
-                {suggestions.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50"
-                  >
-                    <div className="p-2">
-                      {suggestions.map((item) => (
-                        <button
-                          key={item.id}
-                          onClick={() => {
-                            setSearchQuery('');
-                            setSuggestions([]);
-                            // Here you could navigate to the item
-                          }}
-                          className="w-full text-left px-4 py-3 hover:bg-gray-50 rounded-xl flex items-center gap-3 transition-colors group"
-                        >
-                          <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                            <img src={item.thumb} alt="" className="w-full h-full object-cover" />
-                          </div>
-                          <div>
-                            <div className="text-sm font-bold text-gray-900 group-hover:text-brand-primary transition-colors line-clamp-1">
-                              {item.title}
-                            </div>
-                            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">
-                              {item.type === 'COURSE' ? 'Treinamento' : item.type}
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            
-            <Tooltip content="Notificações">
-              <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors relative group">
-                <Bell className="h-5 w-5 group-hover:rotate-12 transition-transform" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-              </button>
-            </Tooltip>
-            
-            <Tooltip content="Idioma">
-              <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-                <Globe className="h-5 w-5" />
-              </button>
-            </Tooltip>
-            
-            <div className="h-8 w-px bg-gray-200 mx-2"></div>
-            
-            <div className="relative">
-              <button 
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center gap-2 p-1 pr-3 hover:bg-gray-100 rounded-full transition-colors"
+          {/* Search */}
+          <div ref={searchRef} className="relative flex-1 max-w-md">
+            <input
+              type="text"
+              placeholder="Pesquisar cursos, trilhas..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-gray-100/80 border border-transparent focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary/30 rounded-full text-sm transition-all duration-200 placeholder:text-gray-400"
+            />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+          <AnimatePresence>
+            {suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50"
               >
-                <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary overflow-hidden">
-                  <img src="https://picsum.photos/seed/user/100/100" alt="Avatar" className="w-full h-full object-cover" />
-                </div>
-                <span className="text-sm font-medium text-gray-700 hidden lg:block">Caio Gomes</span>
-              </button>
-
-              <AnimatePresence>
-                {isUserMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden"
-                  >
-                    <div className="px-4 py-3 border-b border-gray-100 mb-2 bg-gray-50/50">
-                      <div className="text-sm font-bold text-gray-900">Caio Gomes</div>
-                      <div className="text-xs text-gray-500 truncate">suporte2@lectortec.com.br</div>
-                    </div>
-                    
-                    <button 
-                      onClick={() => setIsMinhaAreaOpen(!isMinhaAreaOpen)}
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center justify-between transition-colors"
+                <div className="p-2">
+                  {suggestions.map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => { setSearchQuery(''); setSuggestions([]); }}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 rounded-xl flex items-center gap-3 transition-colors group"
                     >
-                      <div className="flex items-center gap-3">
-                        <LayoutDashboard className="h-4 w-4" /> Minha Area
+                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src={item.thumb} alt="" className="w-full h-full object-cover" />
                       </div>
-                      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMinhaAreaOpen ? 'rotate-180' : ''}`} />
+                      <div>
+                        <div className="text-sm font-bold text-gray-900 group-hover:text-brand-primary transition-colors line-clamp-1">{item.title}</div>
+                        <div className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">{item.type === 'COURSE' ? 'Treinamento' : item.type}</div>
+                      </div>
                     </button>
-                    
-                    <AnimatePresence>
-                      {isMinhaAreaOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden bg-gray-50/30"
-                        >
-                          <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors">
-                            <Play className="h-3.5 w-3.5" /> Meus Treinamentos
-                          </button>
-                          <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors">
-                            <Compass className="h-3.5 w-3.5" /> Minhas Trilhas
-                          </button>
-                          <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors">
-                            <Star className="h-3.5 w-3.5" /> Minhas Habilidades
-                          </button>
-                          <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors">
-                            <Award className="h-3.5 w-3.5" /> Meus Certificados
-                          </button>
-                          <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors">
-                            <Calendar className="h-3.5 w-3.5" /> Meu Calendário
-                          </button>
-                          <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors">
-                            <ShoppingBag className="h-3.5 w-3.5" /> Minhas Compras
-                          </button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-                    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors">
-                      <Users className="h-4 w-4" /> Selecionar perfil
-                    </button>
-                    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors">
-                      <Globe className="h-4 w-4" /> Alterar idioma
-                    </button>
-                    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors">
-                      <Download className="h-4 w-4" /> Instalar
-                    </button>
-                    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors">
-                      <CheckCircle className="h-4 w-4" /> Validar termos de Aceite
-                    </button>
-                    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors">
-                      <BookOpen className="h-4 w-4" /> Ver glossário
-                    </button>
-                    
-                    <div className="h-px bg-gray-100 my-2"></div>
-                    
-                    <button className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors font-medium">
-                      <LogOut className="h-4 w-4" /> Sair
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          <div className="md:hidden flex items-center">
-            <Tooltip content="Menu" direction="left">
-              <button 
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg"
-              >
-                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </Tooltip>
+        {/* Right actions */}
+        <div className="flex items-center gap-1 ml-auto">
+          <Tooltip content="Notificações">
+            <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors relative">
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+            </button>
+          </Tooltip>
+          <Tooltip content="Idioma">
+            <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+              <Globe className="h-5 w-5" />
+            </button>
+          </Tooltip>
+          <div className="h-8 w-px bg-gray-200 mx-1" />
+          <div ref={userMenuRef} className="relative">
+            <button
+              onClick={() => setIsUserMenuOpen(v => !v)}
+              className="flex items-center gap-2 p-1 pr-3 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary overflow-hidden">
+                <img src="https://picsum.photos/seed/user/100/100" alt="Avatar" className="w-full h-full object-cover" />
+              </div>
+              <span className="text-sm font-medium text-gray-700 hidden lg:block">Caio Gomes</span>
+            </button>
+            <AnimatePresence>
+              {isUserMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden"
+                >
+                  <div className="px-4 py-3 border-b border-gray-100 mb-2 bg-gray-50/50">
+                    <div className="text-sm font-bold text-gray-900">Caio Gomes</div>
+                    <div className="text-xs text-gray-500 truncate">suporte2@lectortec.com.br</div>
+                  </div>
+                  <button
+                    onClick={() => setIsMinhaAreaOpen(v => !v)}
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center justify-between transition-colors"
+                  >
+                    <div className="flex items-center gap-3"><LayoutDashboard className="h-4 w-4" /> Minha Area</div>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMinhaAreaOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {isMinhaAreaOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden bg-gray-50/30"
+                      >
+                        <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Play className="h-3.5 w-3.5" /> Meus Treinamentos</button>
+                        <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Compass className="h-3.5 w-3.5" /> Minhas Trilhas</button>
+                        <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Star className="h-3.5 w-3.5" /> Minhas Habilidades</button>
+                        <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Award className="h-3.5 w-3.5" /> Meus Certificados</button>
+                        <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Calendar className="h-3.5 w-3.5" /> Meu Calendário</button>
+                        <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><ShoppingBag className="h-3.5 w-3.5" /> Minhas Compras</button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><Users className="h-4 w-4" /> Selecionar perfil</button>
+                  <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><Globe className="h-4 w-4" /> Alterar idioma</button>
+                  <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><Download className="h-4 w-4" /> Instalar</button>
+                  <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><CheckCircle className="h-4 w-4" /> Validar termos de Aceite</button>
+                  <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><BookOpen className="h-4 w-4" /> Ver glossário</button>
+                  <div className="h-px bg-gray-100 my-2" />
+                  <button className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors font-medium"><LogOut className="h-4 w-4" /> Sair</button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-t border-gray-100 overflow-hidden"
-          >
-            <div className="px-4 pt-2 pb-6 space-y-1">
-              {navItems.map((item) => (
-                <button
-                  key={item}
-                  onClick={() => {
-                    setActiveTab(item);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-colors ${
-                    activeTab === item ? 'bg-brand-primary/10 text-brand-primary' : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
-              <div className="pt-4 border-t border-gray-100 mt-4">
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary overflow-hidden">
-                    <img src="https://picsum.photos/seed/user/100/100" alt="Avatar" className="w-full h-full object-cover" />
-                  </div>
-                  <div>
-                    <div className="text-base font-medium text-gray-800">Caio Gomes</div>
-                    <div className="text-sm text-gray-500">suporte2@lectortec.com.br</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+    </div>
+    </header>
   );
 };
 
+// ============================================================
+// SIDEBAR
+// ============================================================
+const Sidebar = ({
+  activeTab,
+  setActiveTab,
+  isOpen,
+  onClose,
+  activeVitrineId,
+  setActiveVitrineId,
+}: {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  activeVitrineId: string;
+  setActiveVitrineId: (id: string) => void;
+}) => {
+  const [vitrineBusca, setVitrineBusca] = useState('');
+
+  // Close sidebar on desktop resize or Escape key
+  useEffect(() => {
+    const handleResize = () => { if (window.innerWidth >= 1024) onClose(); };
+    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('resize', handleResize);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
+  const vitrineFiltradas = vitrineBusca.trim().length > 0
+    ? VITRINES.filter(v =>
+        v.nome.toLowerCase().includes(vitrineBusca.toLowerCase()) ||
+        v.categoria.toLowerCase().includes(vitrineBusca.toLowerCase())
+      )
+    : VITRINES;
+  const categorias = [...new Set(vitrineFiltradas.map(v => v.categoria))];
+
+  const NAV_ITEMS = [
+    { id: 'Conteúdo', label: 'Conteúdo', icon: BookOpen },
+    { id: 'Social', label: 'Social', icon: Users },
+    { id: 'Minha Área', label: 'Minha Área', icon: LayoutDashboard },
+  ];
+
+  const handleNavClick = (id: string) => { setActiveTab(id); onClose(); };
+
+  return (
+    <>
+      {/* Single sidebar — CSS transform handles mobile open/close */}
+      <aside
+        className={`fixed left-0 top-0 lg:top-16 h-full lg:h-[calc(100vh-64px)] w-64 bg-white border-r border-gray-100 z-40 flex flex-col
+          transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+      >
+        {/* Mobile header */}
+        <div className="flex items-center justify-between px-4 h-16 border-b border-gray-100 flex-shrink-0 lg:hidden">
+          <img src={logoLector} alt="Lector" className="h-9 w-auto cursor-pointer" onClick={() => { setActiveTab('Conteúdo'); onClose(); }} />
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto py-4 px-3">
+          {/* Menu principal */}
+          {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => handleNavClick(id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                activeTab === id
+                  ? 'bg-brand-primary/8 text-brand-primary'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
+              }`}
+            >
+              <Icon className="w-4 h-4 flex-shrink-0" />
+              {label}
+            </button>
+          ))}
+
+          <div className="h-px bg-gray-100 mx-1 my-3" />
+
+          {/* Vitrines */}
+          <p className="text-[11px] font-semibold text-gray-400 px-2 mb-2 tracking-wide">Vitrines</p>
+          <div className="relative mb-2">
+            <input
+              type="text"
+              placeholder="Buscar vitrine..."
+              value={vitrineBusca}
+              onChange={e => setVitrineBusca(e.target.value)}
+              className="w-full pl-7 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition"
+            />
+            <Search className="absolute left-2 top-[7px] w-3.5 h-3.5 text-gray-400" />
+          </div>
+
+          {categorias.length === 0 && (
+            <p className="text-xs text-gray-400 text-center py-3">Nenhuma encontrada</p>
+          )}
+          {categorias.map(cat => (
+            <div key={cat} className="mb-1">
+              <p className={`text-[10px] font-medium px-2 py-0.5 mb-0.5 ${CATEGORIA_COR[cat] ?? 'text-gray-400'}`}>{cat}</p>
+              {vitrineFiltradas.filter(v => v.categoria === cat).map(vitrine => {
+                const isActive = vitrine.id === activeVitrineId;
+                return (
+                  <button
+                    key={vitrine.id}
+                    onClick={() => { setActiveVitrineId(vitrine.id); onClose(); }}
+                    className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-lg transition-colors ${
+                      isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <span
+                      className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 text-white text-[10px] font-black"
+                      style={{ background: vitrine.cor }}
+                    >
+                      {vitrine.nome.charAt(0)}
+                    </span>
+                    <span className="flex-1 text-left text-xs font-semibold truncate">{vitrine.nome}</span>
+                    {isActive && <Check className="w-3 h-3 flex-shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </aside>
+
+      {/* Backdrop - mobile only */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="sidebar-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 z-30 lg:hidden"
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+type StorySegment = { type: 'image' | 'video'; url: string };
+type Story = { id: number; user: { id: number; name: string; role: string; avatar: string }; segments: StorySegment[]; viewed: boolean };
+
+const STORY_USERS = [
+  { id: 1, name: 'Lia do RH', role: 'Recursos Humanos', avatar: 'https://ui-avatars.com/api/?name=Lia+RH&background=F3E8FF&color=9333EA' },
+  { id: 2, name: 'Patrick', role: 'Engenharia de Software', avatar: 'https://ui-avatars.com/api/?name=Patrick&background=DBEAFE&color=2563EB' },
+  { id: 3, name: 'Carla', role: 'Marketing', avatar: 'https://ui-avatars.com/api/?name=Carla&background=FCE7F3&color=DB2777' },
+  { id: 4, name: 'Serginho', role: 'Vendas', avatar: 'https://ui-avatars.com/api/?name=Serginho&background=FEF3C7&color=D97706' },
+];
+
+const INITIAL_STORIES: Story[] = [
+  { id: 1, user: STORY_USERS[0], viewed: false, segments: [{ type: 'image', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500&h=890&fit=crop' }] },
+  { id: 2, user: STORY_USERS[1], viewed: false, segments: [{ type: 'image', url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=500&h=890&fit=crop' }, { type: 'image', url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=500&h=890&fit=crop' }] },
+  { id: 3, user: STORY_USERS[2], viewed: false, segments: [{ type: 'image', url: 'https://images.unsplash.com/photo-1552581234-26160f608093?w=500&h=890&fit=crop' }] },
+  { id: 4, user: STORY_USERS[3], viewed: false, segments: [{ type: 'image', url: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=500&h=890&fit=crop' }] },
+];
+
+const StoryViewerSideCard = ({ s, side, onPrev, onNext }: { s: Story; side: 'left' | 'right'; onPrev: () => void; onNext: () => void }) => (
+  <div
+    onClick={side === 'left' ? onPrev : onNext}
+    className="absolute top-1/2 cursor-pointer select-none"
+    style={{
+      transform: `translateY(-50%) translateX(${side === 'left' ? '-65%' : '65%'}) scale(0.87)`,
+      [side === 'left' ? 'right' : 'left']: '50%',
+      zIndex: 5,
+      opacity: 0.65,
+    }}
+  >
+    <div className="w-[280px] aspect-[9/16] rounded-2xl overflow-hidden bg-gray-900 shadow-2xl max-h-[72vh]">
+      {s.segments[0].type === 'image'
+        ? <img src={s.segments[0].url} alt="" className="w-full h-full object-cover" />
+        : <video src={s.segments[0].url} className="w-full h-full object-cover scale-x-[-1]" muted />
+      }
+      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
+        <div className="flex items-center gap-2">
+          <img src={s.user.avatar} alt={s.user.name} className="w-8 h-8 rounded-full border-2 border-white/50" />
+          <div>
+            <p className="text-white font-bold text-sm leading-tight">{s.user.name}</p>
+            <p className="text-white/60 text-[11px]">1 h</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const SOCIAL_FEEDS = [
+  { id: 'geral', label: 'Geral' },
+  { id: 'rh', label: 'Recursos Humanos' },
+  { id: 'tecnologia', label: 'Tecnologia' },
+  { id: 'lideranca', label: 'Liderança' },
+  { id: 'comercial', label: 'Comercial' },
+  { id: 'projetos', label: 'Projetos' },
+  { id: 'inovacao', label: 'Inovação' },
+];
+
+const SOCIAL_BANNER_SLIDES = [
+  { text: 'Bem-vindo à sua plataforma de aprendizagem', sub: 'Cresça junto com sua equipe todos os dias' },
+  { text: 'Compartilhe conquistas e ideias', sub: 'Celebre cada avanço com quem importa' },
+  { text: 'Desenvolva novas habilidades', sub: 'Seu próximo nível começa aqui' },
+  { text: 'Conecte-se com sua organização', sub: 'Troca de conhecimento que transforma' },
+];
+
 const SocialView = () => {
+  const [bannerIdx, setBannerIdx] = useState(0);
+  const [activeFeed, setActiveFeed] = useState('geral');
   const [activeProfile, setActiveProfile] = useState<any | null>(null);
   const [likedPosts, setLikedPosts] = useState<number[]>([]);
   const [expandedComments, setExpandedComments] = useState<number[]>([]);
   const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
+  const storyRef = useRef<HTMLDivElement>(null);
+  const feedRef = useRef<HTMLDivElement>(null);
+  const scrollStory = (dir: 'left' | 'right') => storyRef.current?.scrollBy({ left: dir === 'right' ? 140 : -140, behavior: 'smooth' });
+  const scrollFeed = (dir: 'left' | 'right') => feedRef.current?.scrollBy({ left: dir === 'right' ? 180 : -180, behavior: 'smooth' });
 
-  const toggleLike = (id: number) => {
-    if (likedPosts.includes(id)) {
-      setLikedPosts(likedPosts.filter(pId => pId !== id));
-    } else {
-      setLikedPosts([...likedPosts, id]);
+  // ── Stories ──────────────────────────────────────────────────────
+  const [stories, setStories] = useState<Story[]>(INITIAL_STORIES);
+
+  // Recorder
+  const [recorderOpen, setRecorderOpen] = useState(false);
+  const [recState, setRecState] = useState<'idle' | 'recording' | 'review'>('idle');
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+  const [recordSeconds, setRecordSeconds] = useState(0);
+  const MAX_REC = 15;
+  const cameraRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const t = setInterval(() => setBannerIdx(i => (i + 1) % SOCIAL_BANNER_SLIDES.length), 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    if (!recorderOpen) {
+      streamRef.current?.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+      if (recTimerRef.current) clearInterval(recTimerRef.current);
+      return;
     }
+    setRecState('idle');
+    setRecordedUrl(null);
+    setRecordSeconds(0);
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true })
+      .then(stream => {
+        streamRef.current = stream;
+        if (cameraRef.current) { cameraRef.current.srcObject = stream; cameraRef.current.play(); }
+      })
+      .catch(() => setRecorderOpen(false));
+    return () => { streamRef.current?.getTracks().forEach(t => t.stop()); if (recTimerRef.current) clearInterval(recTimerRef.current); };
+  }, [recorderOpen]);
+
+  const startRecording = () => {
+    if (!streamRef.current) return;
+    chunksRef.current = [];
+    const mr = new MediaRecorder(streamRef.current, { mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm' });
+    mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+    mr.onstop = () => {
+      const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+      setRecordedUrl(URL.createObjectURL(blob));
+      setRecState('review');
+    };
+    mr.start(100);
+    recorderRef.current = mr;
+    setRecState('recording');
+    let secs = 0;
+    recTimerRef.current = setInterval(() => {
+      secs++;
+      setRecordSeconds(secs);
+      if (secs >= MAX_REC) stopRecording();
+    }, 1000);
   };
 
-  const toggleComments = (id: number) => {
-    setExpandedComments(prev => 
-      prev.includes(id) ? prev.filter(pId => pId !== id) : [...prev, id]
-    );
+  const stopRecording = () => {
+    if (recTimerRef.current) clearInterval(recTimerRef.current);
+    recorderRef.current?.stop();
   };
 
-  const users = [
-    { id: 1, name: 'Lia do RH', role: 'Recursos Humanos', avatar: 'https://ui-avatars.com/api/?name=Lia+RH&background=F3E8FF&color=9333EA' },
-    { id: 2, name: 'Patrick', role: 'Engenharia de Software', avatar: 'https://ui-avatars.com/api/?name=Patrick&background=DBEAFE&color=2563EB' },
-    { id: 3, name: 'Carla', role: 'Marketing', avatar: 'https://ui-avatars.com/api/?name=Carla&background=FCE7F3&color=DB2777' },
-    { id: 4, name: 'Serginho', role: 'Vendas', avatar: 'https://ui-avatars.com/api/?name=Serginho&background=FEF3C7&color=D97706' },
-  ];
+  const publishStory = () => {
+    if (!recordedUrl) return;
+    const me = { id: 0, name: 'Caio Gomes', role: 'Você', avatar: 'https://ui-avatars.com/api/?name=Caio+Gomes&background=FF7A1A&color=fff' };
+    setStories(prev => {
+      const idx = prev.findIndex(s => s.id === 0);
+      if (idx !== -1) return prev.map(s => s.id === 0 ? { ...s, segments: [...s.segments, { type: 'video' as const, url: recordedUrl }], viewed: false } : s);
+      return [{ id: 0, user: me, segments: [{ type: 'video' as const, url: recordedUrl }], viewed: false }, ...prev];
+    });
+    setRecorderOpen(false);
+  };
+
+  // Viewer
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerStoryIdx, setViewerStoryIdx] = useState(0);
+  const [viewerSegIdx, setViewerSegIdx] = useState(0);
+  const [segProgress, setSegProgress] = useState(0);
+  const viewerVideoRef = useRef<HTMLVideoElement>(null);
+  const segTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const clearSegTimer = () => { if (segTimerRef.current) { clearInterval(segTimerRef.current); segTimerRef.current = null; } };
+
+  const advanceSegment = (sIdx: number, stIdx: number, allStories: Story[]) => {
+    const story = allStories[stIdx];
+    if (!story) { setViewerOpen(false); return; }
+    if (sIdx < story.segments.length - 1) { setViewerSegIdx(sIdx + 1); setSegProgress(0); }
+    else if (stIdx < allStories.length - 1) { setViewerStoryIdx(stIdx + 1); setViewerSegIdx(0); setSegProgress(0); }
+    else setViewerOpen(false);
+  };
+
+  const goNext = () => { clearSegTimer(); advanceSegment(viewerSegIdx, viewerStoryIdx, stories); };
+  const goPrev = () => {
+    clearSegTimer();
+    if (viewerSegIdx > 0) { setViewerSegIdx(i => i - 1); setSegProgress(0); }
+    else if (viewerStoryIdx > 0) { setViewerStoryIdx(i => i - 1); setViewerSegIdx(0); setSegProgress(0); }
+  };
+
+  const [likedStories, setLikedStories] = useState<string[]>([]);
+  const [storyReply, setStoryReply] = useState('');
+  const toggleStoryLike = (key: string) => setLikedStories(p => p.includes(key) ? p.filter(k => k !== key) : [...p, key]);
+
+  const openViewer = (idx: number) => {
+    setViewerStoryIdx(idx); setViewerSegIdx(0); setSegProgress(0); setViewerOpen(true);
+    setStories(prev => prev.map((s, i) => i === idx ? { ...s, viewed: true } : s));
+  };
+
+  useEffect(() => {
+    if (!viewerOpen) { clearSegTimer(); return; }
+    const story = stories[viewerStoryIdx];
+    if (!story) return;
+    const seg = story.segments[viewerSegIdx];
+    if (!seg) return;
+    clearSegTimer();
+    setSegProgress(0);
+    if (seg.type === 'image') {
+      const duration = 5000;
+      const step = 50;
+      let elapsed = 0;
+      segTimerRef.current = setInterval(() => {
+        elapsed += step;
+        setSegProgress((elapsed / duration) * 100);
+        if (elapsed >= duration) { clearSegTimer(); advanceSegment(viewerSegIdx, viewerStoryIdx, stories); }
+      }, step);
+    }
+    return clearSegTimer;
+  }, [viewerOpen, viewerStoryIdx, viewerSegIdx]);
+
+  // ── Feed data ──────────────────────────────────────────────────────
+  const users = STORY_USERS;
 
   const initialPosts = [
     {
@@ -604,318 +988,515 @@ const SocialView = () => {
     setCommentInputs({ ...commentInputs, [postId]: '' });
   };
 
-  const birthdays = [
-    { name: 'Abrahão Soares', role: 'MDR ACCOUNT', avatar: 'https://ui-avatars.com/api/?name=Abrahão+Soares&background=E0E7FF&color=4338CA' },
-    { name: 'Ana Barbosa de Lima', role: 'RECURSOS HUMANOS', avatar: 'https://ui-avatars.com/api/?name=Ana+Barbosa&background=ECFCCB&color=4D7C0F' },
-  ];
 
   return (
-    <div className="bg-gray-100 min-h-[calc(100vh-64px)] py-8 relative">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* LEFT COLUMN: WIDGETS */}
-          <div className="w-full lg:w-80 flex-shrink-0 space-y-6">
-            
-            {/* Widget: Destaques */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="flex border-b border-gray-100">
-                <button className="flex-1 py-3 text-sm font-bold text-brand-primary border-b-2 border-brand-primary">Destaques</button>
-                <button className="flex-1 py-3 text-sm font-medium text-gray-400 hover:text-gray-600">Grupos</button>
-              </div>
-              <div className="p-4 space-y-4">
-                {users.map(user => (
-                  <div 
-                    key={user.id} 
-                    className="flex items-center gap-3 cursor-pointer p-2 -mx-2 hover:bg-gray-50 rounded-lg transition-colors"
-                    onClick={() => setActiveProfile(user)}
-                  >
-                    <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full shadow-sm" />
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-800">{user.name}</h4>
-                      <p className="text-xs text-gray-500">{user.role}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+    <div className="bg-[#F7F9FC] min-h-[calc(100vh-64px)] relative">
 
-            {/* Widget: Aniversariantes */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-brand-primary/5 p-4 border-b border-brand-primary/10 flex items-center gap-2">
-                <Gift className="text-brand-primary w-5 h-5" />
-                <h3 className="font-bold text-brand-primary">Aniversariantes do mês</h3>
-              </div>
-              <div className="p-4 space-y-4">
-                {birthdays.map((bday, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <img src={bday.avatar} alt={bday.name} className="w-10 h-10 rounded-full shadow-sm" />
-                      <div>
-                        <h4 className="text-sm font-bold text-gray-800">{bday.name}</h4>
-                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider limit-lines-1">{bday.role}</p>
-                      </div>
-                    </div>
-                    <Tooltip content="Enviar Mensagem">
-                      <button className="text-gray-400 hover:text-brand-primary p-2 hover:bg-brand-primary/10 rounded-full transition-colors">
-                        <MessageSquare className="w-4 h-4" />
-                      </button>
-                    </Tooltip>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+      {/* HEADER BANNER */}
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #041433 0%, #0a2254 100%)' }}>
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #FF7A1A 0%, transparent 50%), radial-gradient(circle at 80% 20%, #2563EB 0%, transparent 40%)' }} />
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative flex flex-col items-center text-center">
+          <img src={logoLector} alt="Lector" className="h-10 w-auto mb-6 brightness-0 invert" />
+          <div className="relative h-20 w-full flex items-center justify-center overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={bannerIdx}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -18 }}
+                transition={{ duration: 0.45, ease: 'easeInOut' }}
+                className="absolute text-center px-4"
+              >
+                <p className="text-white text-xl sm:text-2xl font-bold leading-snug">{SOCIAL_BANNER_SLIDES[bannerIdx].text}</p>
+                <p className="text-white/55 text-sm mt-1.5">{SOCIAL_BANNER_SLIDES[bannerIdx].sub}</p>
+              </motion.div>
+            </AnimatePresence>
           </div>
-
-          {/* CENTER COLUMN: FEED */}
-          <div className="flex-grow max-w-2xl w-full mx-auto space-y-6">
-            
-            {/* CRIAR POST BOX */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-               <div className="flex gap-4 mb-4">
-                 <img src={users[0].avatar} alt="Seu Perfil" className="w-10 h-10 rounded-full shadow-sm" />
-                 <input 
-                   type="text" 
-                   placeholder="Compartilhe algo com a rede..." 
-                   className="flex-grow bg-gray-50 border border-gray-200 rounded-full px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all"
-                 />
-               </div>
-               <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                  <div className="flex gap-1">
-                    <Tooltip content="Anexar Imagem" direction="top">
-                      <button className="p-2 text-gray-400 hover:text-brand-primary hover:bg-brand-primary/10 rounded-full transition-colors">
-                        <Camera className="w-5 h-5" />
-                      </button>
-                    </Tooltip>
-                    <Tooltip content="Anexar Arquivo" direction="top">
-                      <button className="p-2 text-gray-400 hover:text-brand-primary hover:bg-brand-primary/10 rounded-full transition-colors">
-                        <Paperclip className="w-5 h-5" />
-                      </button>
-                    </Tooltip>
-                  </div>
-                  <button className="bg-brand-primary text-white font-medium text-sm px-5 py-1.5 rounded-full hover:opacity-90 shadow-sm transition-opacity">
-                    Publicar
-                  </button>
-               </div>
-            </div>
-
-            {/* FEED DE POSTS */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Feed Recente</h3>
-                <button className="text-sm text-brand-primary font-medium hover:underline flex items-center gap-1">
-                  Filtrar timeline 
-                </button>
-              </div>
-
-              {posts.map((post) => {
-                const isLiked = likedPosts.includes(post.id);
-                return (
-                  <motion.div 
-                    key={post.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-                  >
-                    {/* Cabeçalho do Post */}
-                    <div className="p-5 pb-3 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <img 
-                          src={post.user.avatar} 
-                          alt={post.user.name} 
-                          className="w-12 h-12 rounded-full shadow-sm cursor-pointer hover:ring-2 hover:ring-brand-primary hover:ring-offset-2 transition-all" 
-                          onClick={() => setActiveProfile(post.user)}
-                        />
-                        <div>
-                          <h4 
-                            className="font-bold text-gray-900 cursor-pointer hover:text-brand-primary transition-colors"
-                            onClick={() => setActiveProfile(post.user)}
-                          >
-                            {post.user.name}
-                          </h4>
-                          <p className="text-xs text-gray-400">{post.time} • {post.user.role}</p>
-                        </div>
-                      </div>
-                      <Tooltip content="Mais Opções">
-                        <button className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition-colors">
-                          <MoreHorizontal className="w-5 h-5" />
-                        </button>
-                      </Tooltip>
-                    </div>
-
-                    {/* Corpo do Post */}
-                    <div className="p-5 pt-2">
-                      <p className="text-gray-700 leading-relaxed text-[15px] mb-4">
-                        {post.content}
-                      </p>
-                      {post.image && (
-                        <div className="rounded-xl overflow-hidden mb-2 border border-gray-100">
-                          <img src={post.image} alt="Conteúdo da publicação" className="w-full h-auto object-cover max-h-80" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Rodapé - Action Bar */}
-                    <div className="px-5 py-3 border-t border-gray-50 bg-gray-50/50 flex items-center gap-6">
-                      <button 
-                        onClick={() => toggleLike(post.id)}
-                        className={`flex items-center gap-2 font-medium text-sm transition-colors ${
-                          isLiked ? 'text-brand-primary' : 'text-gray-500 hover:text-gray-800'
-                        }`}
-                      >
-                        <motion.div
-                          animate={{ scale: isLiked ? [1, 1.3, 1] : 1 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <Heart className="w-5 h-5" fill={isLiked ? "currentColor" : "none"} />
-                        </motion.div>
-                        {post.likes + (isLiked ? 1 : 0)}
-                      </button>
-
-                      <button 
-                        onClick={() => toggleComments(post.id)}
-                        className="flex items-center gap-2 font-medium text-sm text-gray-500 hover:text-gray-800 transition-colors"
-                      >
-                        <MessageSquare className="w-5 h-5" />
-                        {post.commentsList.length} Comentários
-                      </button>
-                    </div>
-
-                    {/* Comentários */}
-                    <AnimatePresence>
-                      {expandedComments.includes(post.id) && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="px-5 border-t border-gray-100 bg-gray-50/30 overflow-hidden"
-                        >
-                          <div className="py-4 space-y-4">
-                            {post.commentsList.map(comment => (
-                              <div key={comment.id} className="flex gap-3 text-sm">
-                                <img src={comment.user.avatar} alt={comment.user.name} className="w-8 h-8 rounded-full shadow-sm" />
-                                <div className="bg-white border border-gray-100 rounded-xl rounded-tl-sm p-3 flex-grow shadow-sm">
-                                  <div className="flex justify-between items-start mb-1">
-                                    <span className="font-bold text-gray-900">{comment.user.name}</span>
-                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{comment.time}</span>
-                                  </div>
-                                  <p className="text-gray-700 leading-relaxed">{comment.text}</p>
-                                </div>
-                              </div>
-                            ))}
-                            
-                            <div className="flex gap-3 mt-4 pt-4 border-t border-gray-100">
-                              <img src={users[0].avatar} alt="Seu Perfil" className="w-8 h-8 rounded-full shadow-sm" />
-                              <div className="flex-grow flex relative">
-                                <input 
-                                  type="text" 
-                                  placeholder="Escreva um comentário..." 
-                                  className="w-full bg-white border border-gray-200 rounded-full pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary shadow-sm transition-all"
-                                  value={commentInputs[post.id] || ''}
-                                  onChange={(e) => setCommentInputs({...commentInputs, [post.id]: e.target.value})}
-                                  onKeyDown={(e) => e.key === 'Enter' && handleAddComment(post.id)}
-                                />
-                                <div className="absolute right-1 top-1/2 -translate-y-1/2">
-                                  <Tooltip content="Enviar" direction="left">
-                                    <button 
-                                      onClick={() => handleAddComment(post.id)}
-                                      className={`p-1.5 rounded-full transition-colors ${
-                                        commentInputs[post.id]?.trim() ? 'bg-brand-primary text-white hover:bg-brand-primary/90' : 'text-gray-400 bg-gray-100 hover:bg-gray-200'
-                                      }`}
-                                      disabled={!commentInputs[post.id]?.trim()}
-                                    >
-                                      <Send className="w-4 h-4" />
-                                    </button>
-                                  </Tooltip>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })}
-            </div>
-            
+          <div className="flex items-center gap-1.5 mt-4">
+            {SOCIAL_BANNER_SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setBannerIdx(i)}
+                className={`rounded-full transition-all duration-300 ${i === bannerIdx ? 'w-5 h-1.5 bg-brand-primary' : 'w-1.5 h-1.5 bg-white/25 hover:bg-white/50'}`}
+              />
+            ))}
           </div>
-
         </div>
       </div>
 
-      {/* OVERLAY E MODAL DE PERFIL */}
+      {/* FEEDS / FÓRUNS */}
+      <div className="bg-white border-b border-gray-100 sticky top-16 z-10">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-1">
+          <button onClick={() => scrollFeed('left')} className="flex-shrink-0 text-gray-300 hover:text-gray-600 transition-colors p-1">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div ref={feedRef} className="flex items-center gap-2 overflow-x-hidden flex-1" style={{ scrollbarWidth: 'none' }}>
+            {SOCIAL_FEEDS.map(feed => (
+              <button
+                key={feed.id}
+                onClick={() => setActiveFeed(feed.id)}
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  activeFeed === feed.id
+                    ? 'bg-brand-primary text-white shadow-sm'
+                    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+                }`}
+              >
+                {feed.label}
+              </button>
+            ))}
+          </div>
+          <button onClick={() => scrollFeed('right')} className="flex-shrink-0 text-gray-300 hover:text-gray-600 transition-colors p-1">
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* FEED */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
+
+        {/* CRIAR POST */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-5">
+          <div className="flex gap-4 mb-4">
+            <img src={users[0].avatar} alt="Seu Perfil" className="w-10 h-10 rounded-full shadow-sm flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Compartilhe algo com a rede..."
+              className="flex-grow bg-gray-50 border border-gray-200 rounded-full px-5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all"
+            />
+          </div>
+          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+            <div className="flex gap-1">
+              <Tooltip content="Anexar Imagem" direction="top">
+                <button className="p-2 text-gray-400 hover:text-brand-primary hover:bg-brand-primary/10 rounded-full transition-colors">
+                  <Camera className="w-5 h-5" />
+                </button>
+              </Tooltip>
+              <Tooltip content="Anexar Arquivo" direction="top">
+                <button className="p-2 text-gray-400 hover:text-brand-primary hover:bg-brand-primary/10 rounded-full transition-colors">
+                  <Paperclip className="w-5 h-5" />
+                </button>
+              </Tooltip>
+            </div>
+            <button className="bg-brand-primary text-white font-semibold text-sm px-6 py-2 rounded-full hover:opacity-90 shadow-sm transition-opacity">
+              Publicar
+            </button>
+          </div>
+        </div>
+
+        {/* LABEL DO FEED */}
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-5 rounded-full bg-brand-primary" />
+            <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Feed Recente</h3>
+          </div>
+          <button className="text-sm text-brand-primary font-medium hover:underline">
+            Filtrar timeline
+          </button>
+        </div>
+
+        {/* POSTS */}
+        {posts.map((post, index) => {
+          const isLiked = likedPosts.includes(post.id);
+          return (
+            <motion.div
+              key={post.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.08 }}
+              className="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden"
+            >
+              {/* Header */}
+              <div className="p-5 pb-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setActiveProfile(post.user)} className="flex-shrink-0">
+                    <img
+                      src={post.user.avatar}
+                      alt={post.user.name}
+                      className="w-11 h-11 rounded-full shadow-sm hover:ring-2 hover:ring-brand-primary hover:ring-offset-2 transition-all"
+                    />
+                  </button>
+                  <div>
+                    <button
+                      onClick={() => setActiveProfile(post.user)}
+                      className="font-bold text-gray-900 hover:text-brand-primary transition-colors text-[15px] leading-tight"
+                    >
+                      {post.user.name}
+                    </button>
+                    <p className="text-xs text-gray-400 mt-0.5">{post.time} · {post.user.role}</p>
+                  </div>
+                </div>
+                <Tooltip content="Mais Opções">
+                  <button className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition-colors">
+                    <MoreHorizontal className="w-5 h-5" />
+                  </button>
+                </Tooltip>
+              </div>
+
+              {/* Conteúdo */}
+              <div className="px-5 pb-4">
+                <p className="text-gray-700 leading-relaxed text-[15px] mb-4">{post.content}</p>
+                {post.image && (
+                  <div className="rounded-xl overflow-hidden border border-gray-100">
+                    <img src={post.image} alt="Publicação" className="w-full h-auto object-cover max-h-96" />
+                  </div>
+                )}
+              </div>
+
+              {/* Action bar */}
+              <div className="px-5 py-3 border-t border-gray-100 flex items-center gap-6">
+                <button
+                  onClick={() => toggleLike(post.id)}
+                  className={`flex items-center gap-2 font-semibold text-sm transition-colors ${isLiked ? 'text-brand-primary' : 'text-gray-500 hover:text-gray-800'}`}
+                >
+                  <motion.div animate={{ scale: isLiked ? [1, 1.35, 1] : 1 }} transition={{ duration: 0.25 }}>
+                    <Heart className="w-5 h-5" fill={isLiked ? 'currentColor' : 'none'} />
+                  </motion.div>
+                  {post.likes + (isLiked ? 1 : 0)}
+                </button>
+
+                <button
+                  onClick={() => toggleComments(post.id)}
+                  className="flex items-center gap-2 font-semibold text-sm text-gray-500 hover:text-gray-800 transition-colors"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                  {post.commentsList.length} Comentários
+                </button>
+              </div>
+
+              {/* Comentários */}
+              <AnimatePresence>
+                {expandedComments.includes(post.id) && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="border-t border-gray-100 bg-gray-50/40 overflow-hidden"
+                  >
+                    <div className="px-5 py-4 space-y-4">
+                      {post.commentsList.map(comment => (
+                        <div key={comment.id} className="flex gap-3 text-sm">
+                          <img src={comment.user.avatar} alt={comment.user.name} className="w-8 h-8 rounded-full shadow-sm flex-shrink-0" />
+                          <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 flex-grow shadow-sm">
+                            <div className="flex justify-between items-start mb-1">
+                              <span className="font-bold text-gray-900">{comment.user.name}</span>
+                              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{comment.time}</span>
+                            </div>
+                            <p className="text-gray-700 leading-relaxed">{comment.text}</p>
+                          </div>
+                        </div>
+                      ))}
+
+                      <div className="flex gap-3 pt-3 border-t border-gray-100">
+                        <img src={users[0].avatar} alt="Seu Perfil" className="w-8 h-8 rounded-full shadow-sm flex-shrink-0" />
+                        <div className="flex-grow flex relative">
+                          <input
+                            type="text"
+                            placeholder="Escreva um comentário..."
+                            className="w-full bg-white border border-gray-200 rounded-full pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary shadow-sm transition-all"
+                            value={commentInputs[post.id] || ''}
+                            onChange={(e) => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddComment(post.id)}
+                          />
+                          <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                            <Tooltip content="Enviar" direction="left">
+                              <button
+                                onClick={() => handleAddComment(post.id)}
+                                className={`p-1.5 rounded-full transition-colors ${commentInputs[post.id]?.trim() ? 'bg-brand-primary text-white hover:bg-brand-primary/90' : 'text-gray-400 bg-gray-100 hover:bg-gray-200'}`}
+                                disabled={!commentInputs[post.id]?.trim()}
+                              >
+                                <Send className="w-4 h-4" />
+                              </button>
+                            </Tooltip>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* ── STORY RECORDER ──────────────────────────────────────── */}
+      <AnimatePresence>
+        {recorderOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] bg-black flex flex-col items-center justify-center"
+          >
+            {/* Header */}
+            <div className="absolute top-0 inset-x-0 flex items-center justify-between px-5 pt-5 z-10">
+              <span className="text-white font-bold text-lg" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                {recState === 'review' ? 'Seu Story' : 'Novo Story'}
+              </span>
+              <button onClick={() => setRecorderOpen(false)} className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Camera / Review */}
+            <div className="relative w-full max-w-sm aspect-[9/16] bg-gray-900 rounded-2xl overflow-hidden">
+              {recState !== 'review' && (
+                <video ref={cameraRef} autoPlay muted playsInline className="w-full h-full object-cover scale-x-[-1]" />
+              )}
+              {recState === 'review' && recordedUrl && (
+                <video src={recordedUrl} autoPlay loop playsInline className="w-full h-full object-cover scale-x-[-1]" />
+              )}
+
+              {/* Recording progress bar */}
+              {recState === 'recording' && (
+                <div className="absolute top-0 inset-x-0 h-1 bg-white/20">
+                  <motion.div
+                    className="h-full bg-brand-primary"
+                    animate={{ width: `${(recordSeconds / MAX_REC) * 100}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+              )}
+              {recState === 'recording' && (
+                <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  {MAX_REC - recordSeconds}s
+                </div>
+              )}
+            </div>
+
+            {/* Controls */}
+            <div className="mt-8 flex flex-col items-center gap-4">
+              {recState === 'idle' && (
+                <button
+                  onClick={startRecording}
+                  className="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center hover:scale-105 transition-transform active:scale-95"
+                >
+                  <span className="w-10 h-10 rounded-full bg-red-500 block" />
+                </button>
+              )}
+              {recState === 'recording' && (
+                <button
+                  onClick={stopRecording}
+                  className="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center hover:scale-105 transition-transform active:scale-95"
+                >
+                  <span className="w-6 h-6 rounded bg-white block" />
+                </button>
+              )}
+              {recState === 'review' && (
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => { setRecState('idle'); setRecordedUrl(null); setRecordSeconds(0); }}
+                    className="px-6 py-2.5 rounded-full border border-white/40 text-white text-sm font-medium hover:bg-white/10 transition"
+                  >
+                    Gravar de novo
+                  </button>
+                  <button
+                    onClick={publishStory}
+                    className="px-6 py-2.5 rounded-full bg-brand-primary text-white text-sm font-bold hover:opacity-90 transition shadow-lg"
+                  >
+                    Publicar Story
+                  </button>
+                </div>
+              )}
+              {recState === 'idle' && (
+                <p className="text-white/40 text-xs">Toque para gravar · máximo {MAX_REC}s</p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── STORY VIEWER ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {viewerOpen && stories[viewerStoryIdx] && (() => {
+          const story = stories[viewerStoryIdx];
+          const seg = story.segments[viewerSegIdx];
+          const prevStory = stories[viewerStoryIdx - 1];
+          const nextStory = stories[viewerStoryIdx + 1];
+          const likeKey = `${story.id}-${viewerSegIdx}`;
+          const isLiked = likedStories.includes(likeKey);
+
+
+          return (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[80] flex flex-col items-center justify-center"
+              style={{ background: 'rgba(0,0,0,0.92)' }}
+            >
+              {/* Close */}
+              <button
+                onClick={() => setViewerOpen(false)}
+                className="absolute top-5 right-5 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              {/* Cards area */}
+              <div className="relative flex items-center justify-center w-full overflow-hidden" style={{ height: 'calc(100dvh - 90px)' }}>
+
+                {/* Side cards */}
+                {prevStory && <StoryViewerSideCard s={prevStory} side="left" onPrev={goPrev} onNext={goNext} />}
+                {nextStory && <StoryViewerSideCard s={nextStory} side="right" onPrev={goPrev} onNext={goNext} />}
+
+                {/* Active card */}
+                <motion.div
+                  key={`story-${viewerStoryIdx}`}
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.2 }}
+                  className="relative z-10 flex-shrink-0"
+                  style={{ width: 'min(360px, 90vw)' }}
+                >
+                  <div className="relative w-full aspect-[9/16] rounded-2xl overflow-hidden bg-gray-900 shadow-2xl" style={{ maxHeight: 'calc(100dvh - 90px)' }}>
+
+                    {/* Tap zones */}
+                    <div className="absolute inset-0 flex z-20 pointer-events-auto">
+                      <div className="flex-1 cursor-pointer" onClick={goPrev} />
+                      <div className="flex-1 cursor-pointer" onClick={goNext} />
+                    </div>
+
+                    {/* Media */}
+                    {seg.type === 'image'
+                      ? <img src={seg.url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                      : <video
+                          ref={viewerVideoRef}
+                          src={seg.url}
+                          autoPlay
+                          playsInline
+                          className="absolute inset-0 w-full h-full object-cover scale-x-[-1]"
+                          onEnded={goNext}
+                          onTimeUpdate={e => { const v = e.currentTarget; if (v.duration) setSegProgress((v.currentTime / v.duration) * 100); }}
+                        />
+                    }
+
+                    {/* Gradients */}
+                    <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-black/70 to-transparent pointer-events-none" />
+                    <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+
+                    {/* Progress bars */}
+                    <div className="relative z-30 flex gap-[3px] px-3 pt-3">
+                      {story.segments.map((_, i) => (
+                        <div key={i} className="flex-1 h-[3px] rounded-full bg-white/30 overflow-hidden">
+                          <div
+                            className="h-full bg-white rounded-full transition-none"
+                            style={{ width: i < viewerSegIdx ? '100%' : i === viewerSegIdx ? `${segProgress}%` : '0%' }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* User info row */}
+                    <div className="relative z-30 flex items-center gap-3 px-4 pt-3">
+                      <img src={story.user.avatar} alt={story.user.name} className="w-9 h-9 rounded-full border-2 border-white/60 shadow" />
+                      <div className="flex-1">
+                        <p className="text-white font-bold text-sm leading-tight">{story.user.name}</p>
+                        <p className="text-white/60 text-[11px]">1 h · {story.user.role}</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Reply bar */}
+              <div className="w-full flex items-center gap-3 px-4 pb-4 pt-3" style={{ maxWidth: 'min(360px, 90vw)' }}>
+                <input
+                  type="text"
+                  placeholder={`Responder a ${story.user.name.split(' ')[0]}...`}
+                  value={storyReply}
+                  onChange={e => setStoryReply(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && setStoryReply('')}
+                  className="flex-grow bg-white/10 border border-white/25 rounded-full px-4 py-2.5 text-white text-sm placeholder-white/40 focus:outline-none focus:border-white/50 transition"
+                />
+                <motion.button
+                  onClick={() => toggleStoryLike(likeKey)}
+                  animate={{ scale: isLiked ? [1, 1.35, 1] : 1 }}
+                  transition={{ duration: 0.25 }}
+                  className={`p-2 flex-shrink-0 transition ${isLiked ? 'text-red-400' : 'text-white/60 hover:text-white'}`}
+                >
+                  <Heart className="w-6 h-6" fill={isLiked ? 'currentColor' : 'none'} />
+                </motion.button>
+                <button
+                  onClick={() => setStoryReply('')}
+                  className="p-2 flex-shrink-0 text-white/60 hover:text-white transition"
+                >
+                  <Send className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Chevron nav buttons */}
+              {prevStory && (
+                <button
+                  onClick={goPrev}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-sm"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+              )}
+              {nextStory && (
+                <button
+                  onClick={goNext}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-sm"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              )}
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
+
+      {/* MODAL DE PERFIL */}
       <AnimatePresence>
         {activeProfile && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[60]"
               onClick={() => setActiveProfile(null)}
             />
-            
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, x: 20 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.95, x: 20 }}
-              className="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-[70] flex flex-col"
+              className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-[70] flex flex-col"
             >
-              <div className="relative h-32 bg-brand-primary/10">
+              <div className="relative h-28" style={{ background: 'linear-gradient(135deg, #041433 0%, #0a2254 100%)' }}>
+                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 50%, #FF7A1A 0%, transparent 60%)' }} />
                 <div className="absolute top-4 right-4">
-                  <Tooltip content="Fechar perfil" direction="left">
-                    <button 
-                      onClick={() => setActiveProfile(null)}
-                      className="p-2 bg-white/50 hover:bg-white rounded-full text-gray-700 transition"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </Tooltip>
+                  <button onClick={() => setActiveProfile(null)} className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition">
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
-
-              <div className="px-8 -mt-12 mb-6">
-                <img 
-                  src={activeProfile.avatar} 
-                  alt={activeProfile.name} 
-                  className="w-24 h-24 rounded-full border-4 border-white shadow-lg mb-4 bg-white" 
-                />
-                <h2 className="text-2xl font-bold text-gray-900 mb-1">{activeProfile.name}</h2>
-                <p className="text-brand-primary font-medium">{activeProfile.role}</p>
+              <div className="px-6 -mt-10 mb-4">
+                <img src={activeProfile.avatar} alt={activeProfile.name} className="w-20 h-20 rounded-full border-4 border-white shadow-lg mb-3 bg-white" />
+                <h2 className="text-xl font-bold text-gray-900 mb-0.5" style={{ fontFamily: 'Outfit, sans-serif' }}>{activeProfile.name}</h2>
+                <p className="text-brand-primary font-medium text-sm">{activeProfile.role}</p>
               </div>
-
-              <div className="px-8 flex items-center gap-6 mb-6 pb-6 border-b border-gray-100">
-                 <div className="text-center">
-                   <span className="block text-2xl font-bold text-gray-900">45</span>
-                   <span className="text-xs uppercase font-bold text-gray-400 tracking-wider">Posts</span>
-                 </div>
-                 <div className="text-center">
-                   <span className="block text-2xl font-bold text-gray-900">12</span>
-                   <span className="text-xs uppercase font-bold text-gray-400 tracking-wider">Grupos</span>
-                 </div>
-                 <div className="text-center">
-                   <span className="block text-2xl font-bold text-gray-900">2.4k</span>
-                   <span className="text-xs uppercase font-bold text-gray-400 tracking-wider">Likes</span>
-                 </div>
+              <div className="px-6 flex items-center gap-8 mb-5 pb-5 border-b border-gray-100">
+                {[['45', 'Posts'], ['12', 'Grupos'], ['2.4k', 'Likes']].map(([val, label]) => (
+                  <div key={label} className="text-center">
+                    <span className="block text-xl font-bold text-gray-900">{val}</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">{label}</span>
+                  </div>
+                ))}
               </div>
-
-              <div className="flex-grow overflow-y-auto px-8 pb-8">
-                <h3 className="font-bold text-gray-900 mb-4">Últimas Publicações</h3>
-                <div className="space-y-4">
-                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                     <p className="text-sm text-gray-600 line-clamp-3">Estou muito feliz de anunciar a nova turma do treinamento de liderança!</p>
-                     <span className="text-xs text-gray-400 mt-2 block">Há 2 dias</span>
-                   </div>
-                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                     <p className="text-sm text-gray-600 line-clamp-3">Agradecimentos ao time pelo empenho na entrega de sexta-feira.</p>
-                     <span className="text-xs text-gray-400 mt-2 block">Semana passada</span>
-                   </div>
+              <div className="flex-grow overflow-y-auto px-6 pb-8">
+                <h3 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wider">Últimas Publicações</h3>
+                <div className="space-y-3">
+                  {['Estou muito feliz de anunciar a nova turma do treinamento de liderança!', 'Agradecimentos ao time pelo empenho na entrega de sexta-feira.'].map((text, i) => (
+                    <div key={i} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                      <p className="text-sm text-gray-600 line-clamp-3">{text}</p>
+                      <span className="text-xs text-gray-400 mt-2 block">{i === 0 ? 'Há 2 dias' : 'Semana passada'}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-
             </motion.div>
           </>
         )}
@@ -938,21 +1519,9 @@ const MyAreaTreinamentos = () => {
   const treinamentosData = [
     {
       id: '1',
-      nome: 'treinamento teste documentos 19/01',
-      cargaHoraria: '-',
-      inscricao: '19/01/2026',
-      termino: '-',
-      expiracao: '-',
-      situacao: 'Em andamento',
-      progresso: 100,
-      aproveitamento: 100,
-      badgeColor: 'bg-blue-100 text-blue-700'
-    },
-    {
-      id: '2',
-      nome: 'Teste Scorm',
-      cargaHoraria: '01:00:00',
-      inscricao: '06/01/2026',
+      nome: 'Fundamentos de Inteligência Artificial para Negócios',
+      cargaHoraria: '03:20:00',
+      inscricao: '10/03/2026',
       termino: '-',
       expiracao: '-',
       situacao: 'Em andamento',
@@ -961,35 +1530,47 @@ const MyAreaTreinamentos = () => {
       badgeColor: 'bg-blue-100 text-blue-700'
     },
     {
+      id: '2',
+      nome: 'ChatGPT para Produtividade no Trabalho',
+      cargaHoraria: '02:45:00',
+      inscricao: '20/02/2026',
+      termino: '-',
+      expiracao: '-',
+      situacao: 'Em andamento',
+      progresso: 14.29,
+      aproveitamento: 14.29,
+      badgeColor: 'bg-blue-100 text-blue-700'
+    },
+    {
       id: '3',
-      nome: 'coe coe',
-      cargaHoraria: '-',
-      inscricao: '22/12/2025',
-      termino: '27/02/2026',
+      nome: 'Automação de Processos com Inteligência Artificial',
+      cargaHoraria: '04:10:00',
+      inscricao: '15/01/2026',
+      termino: '10/03/2026',
       expiracao: '-',
       situacao: 'Aguardando correção de avaliações',
       progresso: 100,
-      aproveitamento: 50,
+      aproveitamento: 62.5,
       badgeColor: 'bg-amber-100 text-amber-700'
     },
     {
       id: '4',
-      nome: 'Treinamento 5',
-      cargaHoraria: '01:00:00',
-      inscricao: '15/12/2025',
-      termino: '15/12/2025',
+      nome: 'Gestão do Tempo com Ferramentas de IA',
+      cargaHoraria: '02:10:00',
+      inscricao: '05/12/2025',
+      termino: '05/12/2025',
       expiracao: '-',
       situacao: 'Evadido',
-      progresso: 100,
+      progresso: 42.86,
       aproveitamento: 0,
       badgeColor: 'bg-gray-100 text-gray-700'
     },
     {
       id: '5',
-      nome: 'Treinamento gravações travanado 11227',
-      cargaHoraria: '-',
-      inscricao: '10/04/2026',
-      termino: '10/04/2026',
+      nome: 'IA Aplicada à Criação de Conteúdo',
+      cargaHoraria: '03:00:00',
+      inscricao: '02/10/2025',
+      termino: '15/11/2025',
       expiracao: '-',
       situacao: 'Concluído - Aprovado',
       progresso: 100,
@@ -1010,7 +1591,7 @@ const MyAreaTreinamentos = () => {
             <input 
               type="text" 
               placeholder="Pesquisar treinamentos por nome..." 
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-[#F58220]/20 focus:border-[#F58220] rounded-lg text-sm transition-all text-gray-700"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary rounded-lg text-sm transition-all text-gray-700"
             />
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           </div>
@@ -1041,7 +1622,7 @@ const MyAreaTreinamentos = () => {
                            setSelectedSituacao(opcao);
                            setIsSituacaoOpen(false);
                          }}
-                         className={`w-full text-left px-4 py-2 text-sm transition-colors ${selectedSituacao === opcao ? 'bg-[#F58220]/10 text-[#F58220] font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium'}`}
+                         className={`w-full text-left px-4 py-2 text-sm transition-colors ${selectedSituacao === opcao ? 'bg-brand-primary/10 text-brand-primary font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium'}`}
                        >
                          {opcao}
                        </button>
@@ -1053,7 +1634,7 @@ const MyAreaTreinamentos = () => {
 
              <button 
                onClick={() => setIsAdvancedFiltersOpen(!isAdvancedFiltersOpen)}
-               className={`px-5 py-2.5 border rounded-lg text-sm font-medium flex items-center gap-2 transition-all whitespace-nowrap ${isAdvancedFiltersOpen ? 'bg-[#F58220] border-[#F58220] text-white' : 'bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-700'}`}
+               className={`px-5 py-2.5 border rounded-lg text-sm font-medium flex items-center gap-2 transition-all whitespace-nowrap ${isAdvancedFiltersOpen ? 'bg-brand-primary border-brand-primary text-white' : 'bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-700'}`}
              >
                 <Filter className={`w-4 h-4 ${isAdvancedFiltersOpen ? 'text-white' : 'text-gray-400'}`} />
                 <span>Filtros</span>
@@ -1081,7 +1662,7 @@ const MyAreaTreinamentos = () => {
                        <button
                          key={opcao}
                          onClick={() => setIsExportOpen(false)}
-                         className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#F58220] transition-colors font-medium"
+                         className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-brand-primary transition-colors font-medium"
                        >
                          {opcao}
                        </button>
@@ -1110,12 +1691,12 @@ const MyAreaTreinamentos = () => {
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Filtrar por Inscrição</label>
                   <div className="flex items-center gap-2">
                     <div className="relative flex-1">
-                      <input type="text" placeholder="Data inicial" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-[#F58220] focus:ring-1 focus:ring-[#F58220]" />
+                      <input type="text" placeholder="Data inicial" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary" />
                       <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                     </div>
                     <span className="text-gray-400 text-sm">até</span>
                     <div className="relative flex-1">
-                      <input type="text" placeholder="Data final" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-[#F58220] focus:ring-1 focus:ring-[#F58220]" />
+                      <input type="text" placeholder="Data final" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary" />
                       <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                     </div>
                   </div>
@@ -1129,12 +1710,12 @@ const MyAreaTreinamentos = () => {
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Filtrar por Término</label>
                   <div className="flex items-center gap-2">
                     <div className="relative flex-1">
-                      <input type="text" placeholder="Data inicial" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-[#F58220] focus:ring-1 focus:ring-[#F58220]" />
+                      <input type="text" placeholder="Data inicial" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary" />
                       <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                     </div>
                     <span className="text-gray-400 text-sm">até</span>
                     <div className="relative flex-1">
-                      <input type="text" placeholder="Data final" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-[#F58220] focus:ring-1 focus:ring-[#F58220]" />
+                      <input type="text" placeholder="Data final" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary" />
                       <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                     </div>
                   </div>
@@ -1188,7 +1769,7 @@ const MyAreaTreinamentos = () => {
                 <div className="flex items-center gap-2">
                   <div className="flex-grow h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div 
-                      className={`h-full rounded-full ${curso.situacao.includes('Concluído') ? 'bg-green-500' : 'bg-[#F58220]'}`} 
+                      className={`h-full rounded-full ${curso.situacao.includes('Concluído') ? 'bg-green-500' : 'bg-brand-primary'}`} 
                       style={{ width: `${curso.progresso}%` }}
                     ></div>
                   </div>
@@ -1202,7 +1783,7 @@ const MyAreaTreinamentos = () => {
                 <div className="flex items-center gap-2">
                   <div className="flex-grow h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div 
-                      className={`h-full rounded-full ${curso.situacao.includes('Concluído') ? 'bg-green-500' : 'bg-[#F58220]'}`} 
+                      className={`h-full rounded-full ${curso.situacao.includes('Concluído') ? 'bg-green-500' : 'bg-brand-primary'}`} 
                       style={{ width: `${curso.aproveitamento}%` }}
                     ></div>
                   </div>
@@ -1214,7 +1795,7 @@ const MyAreaTreinamentos = () => {
             {/* Ação Button Dinâmica */}
             <div className="flex-shrink-0 w-full sm:w-auto flex flex-col gap-2">
               {curso.situacao === 'Em andamento' && (
-                <button className="w-full sm:w-auto bg-[#F58220] hover:bg-[#E07010] text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                <button className="w-full sm:w-auto bg-brand-primary hover:bg-[#E07010] text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
                   <Play size={16} fill="currentColor" /> Estudar
                 </button>
               )}
@@ -1277,7 +1858,7 @@ const MyAreaHabilidades = () => {
             onClick={() => setActiveRole(role)}
             className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all ${
               activeRole === role
-                ? 'bg-[#F58220] text-white shadow-sm'
+                ? 'bg-brand-primary text-white shadow-sm'
                 : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
           >
@@ -1304,12 +1885,12 @@ const MyAreaHabilidades = () => {
         <div className="flex-shrink-0 flex items-center gap-5 bg-gray-50 px-6 py-4 rounded-xl border border-gray-100 w-full md:w-auto justify-center">
            <div className="text-right">
              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Prontidão para o Cargo</p>
-             <span className="text-3xl font-display font-bold text-[#F58220]">33%</span>
+             <span className="text-3xl font-display font-bold text-brand-primary">33%</span>
            </div>
            <div className="relative w-16 h-16">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 <path className="text-gray-200" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                <path className="text-[#F58220]" strokeWidth="4" strokeDasharray="33, 100" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path className="text-brand-primary" strokeWidth="4" strokeDasharray="33, 100" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
               </svg>
            </div>
         </div>
@@ -1344,7 +1925,7 @@ const MyAreaHabilidades = () => {
                 <div className="flex items-center gap-3">
                   <span className="text-[11px] font-bold uppercase text-gray-400 w-20 tracking-wider">Progresso</span>
                   <div className="h-1.5 flex-grow bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-600 rounded-full" style={{ width: `${train.progress}%` }}></div>
+                    <div className="h-full bg-brand-primary rounded-full" style={{ width: `${train.progress}%` }}></div>
                   </div>
                   <span className="text-xs font-bold text-gray-700 w-8 text-right">{train.progress}%</span>
                 </div>
@@ -1383,150 +1964,770 @@ const MyAreaHabilidades = () => {
   );
 };
 
-const MyAreaTrilhas = () => (
-  <div className="space-y-6">
-    <div className="bg-white border flex flex-col text-left border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition">
-       <div className="p-5 border-b border-gray-100 flex items-start gap-4">
-          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Compass size={24} />
-          </div>
-          <div className="flex-grow w-full">
-            <h3 className="text-lg font-bold text-gray-900">Liderança do Futuro</h3>
-            <div className="flex items-center gap-3 mt-2">
-              <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden flex-grow">
-                <div className="h-full bg-indigo-600 rounded-full" style={{ width: '20%' }}></div>
-              </div>
-              <span className="text-xs font-bold text-gray-700 w-8">20%</span>
-            </div>
-          </div>
-       </div>
-       <div className="p-5 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Próximo Passo</p>
-            <p className="font-bold text-gray-800">Aula 4: Como dar feedbacks assertivos</p>
-          </div>
-          <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
-             <Play size={16} fill="currentColor" /> Continuar Trilha
-          </button>
-       </div>
-    </div>
-  </div>
-);
+const MyAreaTrilhas = () => {
+  const [isSituacaoOpen, setIsSituacaoOpen] = useState(false);
+  const situacaoOptions = ['Qualquer', 'Em andamento', 'Aguardando correção de avaliações', 'Evadido', 'Concluído - Aprovado', 'Concluído - Reprovado'];
+  const [selectedSituacao, setSelectedSituacao] = useState('Qualquer');
 
-const MyAreaCertificados = () => (
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col justify-between hover:border-gray-300 transition h-48">
-       <div className="flex items-start gap-4 mb-4">
-          <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center border border-amber-100">
-             <Award size={24} />
-          </div>
-          <div>
-            <h3 className="font-bold text-gray-900 leading-tight">Comunicação Assertiva no Trabalho</h3>
-            <p className="text-xs text-gray-500 mt-1">Concluído em: 10/03/2026</p>
-          </div>
-       </div>
-       <button className="w-full mt-auto bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg py-2.5 font-medium transition flex justify-center items-center gap-2">
-          <Download size={18} /> Baixar PDF
-       </button>
-    </div>
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const exportOptions = ['CSV', 'Excel', 'PDF'];
 
-    <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col justify-between hover:border-gray-300 transition h-48">
-       <div className="flex items-start gap-4 mb-4">
-          <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center border border-amber-100">
-             <Award size={24} />
-          </div>
-          <div>
-            <h3 className="font-bold text-gray-900 leading-tight">Gestão de Equipes Híbridas</h3>
-            <p className="text-xs text-gray-500 mt-1">Concluído em: 22/02/2026</p>
-          </div>
-       </div>
-       <button className="w-full mt-auto bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg py-2.5 font-medium transition flex justify-center items-center gap-2">
-          <Download size={18} /> Baixar PDF
-       </button>
-    </div>
-  </div>
-);
+  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
 
-const MyAreaCalendario = () => (
-  <div className="bg-white rounded-xl border border-gray-200 p-6">
-    <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-      Hoje <span className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">Urgente</span>
-    </h3>
-    <div className="space-y-4 mb-8">
-      <div className="flex gap-4 items-start relative pb-4">
-         <div className="absolute top-8 bottom-0 left-[11px] w-px bg-gray-200"></div>
-         <div className="w-6 h-6 rounded-full bg-red-100 border-2 border-red-500 z-10 flex-shrink-0"></div>
-         <div>
-            <span className="text-sm font-bold text-gray-900">14:00</span>
-            <p className="font-medium text-gray-800">Aula ao vivo: Liderança em Momentos Críticos</p>
-         </div>
-      </div>
-      <div className="flex gap-4 items-start relative pb-4">
-         <div className="w-6 h-6 rounded-full bg-red-100 border-2 border-red-500 z-10 flex-shrink-0"></div>
-         <div>
-            <span className="text-sm font-bold text-gray-900">16:30</span>
-            <p className="font-medium text-gray-800">Prazo final: Entrega do trabalho Módulo 2</p>
-         </div>
-      </div>
-    </div>
-    
-    <h3 className="text-lg font-bold text-gray-900 mb-6 border-t border-gray-100 pt-6">
-      Próximos Dias
-    </h3>
-    <div className="space-y-4">
-      <div className="flex gap-4 items-start relative pb-4">
-         <div className="w-6 h-6 rounded-full bg-gray-100 border-2 border-gray-300 z-10 flex-shrink-0"></div>
-         <div>
-            <span className="text-sm font-bold text-gray-600">Terça, 25/04</span>
-            <p className="text-gray-800">Nova trilha disponível: Comunicação Avançada</p>
-         </div>
-      </div>
-    </div>
-  </div>
-);
-
-const MyAreaView = () => {
-  const tabs = ['Meus Treinamentos', 'Minhas Trilhas', 'Minhas Habilidades', 'Meus Certificados', 'Meu Calendário', 'Minhas Compras'];
-  const [activeSubTab, setActiveSubTab] = useState('Meus Treinamentos');
+  const trilhasData = [
+    {
+      id: '1',
+      nome: 'Trilha Liderança e Performance de Equipes',
+      cargaHoraria: '10:40:00',
+      inscricao: '15/01/2026',
+      termino: '-',
+      expiracao: '-',
+      situacao: 'Em andamento',
+      progresso: 37.5,
+      aproveitamento: 37.5,
+      badgeColor: 'bg-blue-100 text-blue-700'
+    },
+    {
+      id: '2',
+      nome: 'Trilha Comunicação Corporativa de Alta Performance',
+      cargaHoraria: '07:45:00',
+      inscricao: '10/11/2025',
+      termino: '15/02/2026',
+      expiracao: '-',
+      situacao: 'Aguardando correção de avaliações',
+      progresso: 100,
+      aproveitamento: 62.5,
+      badgeColor: 'bg-amber-100 text-amber-700'
+    },
+    {
+      id: '3',
+      nome: 'Trilha Gestão do Tempo e Prioridades',
+      cargaHoraria: '08:20:00',
+      inscricao: '05/09/2025',
+      termino: '-',
+      expiracao: '-',
+      situacao: 'Evadido',
+      progresso: 25,
+      aproveitamento: 0,
+      badgeColor: 'bg-gray-100 text-gray-700'
+    },
+    {
+      id: '4',
+      nome: 'Trilha Gestão de Projetos para Times Corporativos',
+      cargaHoraria: '11:15:00',
+      inscricao: '12/07/2025',
+      termino: '30/09/2025',
+      expiracao: '-',
+      situacao: 'Concluído - Aprovado',
+      progresso: 100,
+      aproveitamento: 88,
+      badgeColor: 'bg-green-100 text-green-700'
+    },
+    {
+      id: '5',
+      nome: 'Trilha Eficiência Operacional e Processos',
+      cargaHoraria: '10:30:00',
+      inscricao: '20/04/2025',
+      termino: '15/06/2025',
+      expiracao: '-',
+      situacao: 'Concluído - Reprovado',
+      progresso: 100,
+      aproveitamento: 42,
+      badgeColor: 'bg-red-100 text-red-700'
+    }
+  ];
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-12">
-      {/* Welcome & Rescue Hero */}
-      <div className="mb-10">
-        <h2 className="text-3xl font-display font-bold text-gray-900 mb-6 tracking-tight">
-          Olá, Caio!
-        </h2>
+    <div className="space-y-6">
+
+      {/* Search and Filters Bar */}
+      <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm mb-6 flex flex-col gap-4">
+
+        {/* Top Row: Search and Quick Actions */}
+        <div className="flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center">
+          <div className="relative flex-grow w-full max-w-2xl">
+            <input
+              type="text"
+              placeholder="Pesquisar trilhas por nome..."
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary rounded-lg text-sm transition-all text-gray-700"
+            />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          </div>
+
+          <div className="flex gap-2 w-full xl:w-auto overflow-x-visible pb-2 xl:pb-0 scrollbar-hide shrink-0 relative">
+             <div className="relative">
+               <button
+                 onClick={() => setIsSituacaoOpen(!isSituacaoOpen)}
+                 className="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 flex items-center justify-between gap-2 transition-colors whitespace-nowrap min-w-[140px]"
+               >
+                  <span>{selectedSituacao === 'Qualquer' ? 'Situação' : selectedSituacao}</span>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isSituacaoOpen ? 'rotate-180' : ''}`} />
+               </button>
+
+               <AnimatePresence>
+                 {isSituacaoOpen && (
+                   <motion.div
+                     initial={{ opacity: 0, y: 10 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     exit={{ opacity: 0, y: 10 }}
+                     transition={{ duration: 0.2 }}
+                     className="absolute z-20 top-full mt-2 left-0 w-full min-w-[240px] bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 focus:outline-none overflow-hidden"
+                   >
+                     {situacaoOptions.map((opcao) => (
+                       <button
+                         key={opcao}
+                         onClick={() => {
+                           setSelectedSituacao(opcao);
+                           setIsSituacaoOpen(false);
+                         }}
+                         className={`w-full text-left px-4 py-2 text-sm transition-colors ${selectedSituacao === opcao ? 'bg-brand-primary/10 text-brand-primary font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium'}`}
+                       >
+                         {opcao}
+                       </button>
+                     ))}
+                   </motion.div>
+                 )}
+               </AnimatePresence>
+             </div>
+
+             <button
+               onClick={() => setIsAdvancedFiltersOpen(!isAdvancedFiltersOpen)}
+               className={`px-5 py-2.5 border rounded-lg text-sm font-medium flex items-center gap-2 transition-all whitespace-nowrap ${isAdvancedFiltersOpen ? 'bg-brand-primary border-brand-primary text-white' : 'bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-700'}`}
+             >
+                <Filter className={`w-4 h-4 ${isAdvancedFiltersOpen ? 'text-white' : 'text-gray-400'}`} />
+                <span>Filtros</span>
+             </button>
+
+             <div className="relative">
+               <button
+                 onClick={() => setIsExportOpen(!isExportOpen)}
+                 className="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 flex items-center gap-2 transition-colors whitespace-nowrap min-w-[150px] justify-center"
+               >
+                  <Download className="w-4 h-4 text-gray-400" />
+                  <span>Exportar Dados</span>
+               </button>
+
+               <AnimatePresence>
+                 {isExportOpen && (
+                   <motion.div
+                     initial={{ opacity: 0, y: 10 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     exit={{ opacity: 0, y: 10 }}
+                     transition={{ duration: 0.2 }}
+                     className="absolute z-20 top-full mt-2 right-0 w-full min-w-[150px] bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 focus:outline-none overflow-hidden"
+                   >
+                     {exportOptions.map((opcao) => (
+                       <button
+                         key={opcao}
+                         onClick={() => setIsExportOpen(false)}
+                         className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-brand-primary transition-colors font-medium"
+                       >
+                         {opcao}
+                       </button>
+                     ))}
+                   </motion.div>
+                 )}
+               </AnimatePresence>
+             </div>
+          </div>
+        </div>
+
+        {/* Bottom Row: Advanced Date Filters */}
+        <AnimatePresence>
+          {isAdvancedFiltersOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="flex flex-col lg:flex-row gap-4 pt-4 border-t border-gray-100">
+
+                {/* Data Inscricao Filter */}
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Filtrar por Inscrição</label>
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <input type="text" placeholder="Data inicial" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary" />
+                      <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                    </div>
+                    <span className="text-gray-400 text-sm">até</span>
+                    <div className="relative flex-1">
+                      <input type="text" placeholder="Data final" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary" />
+                      <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Divisor */}
+                <div className="hidden lg:block w-px bg-gray-100 mx-2"></div>
+
+                {/* Data Conclusao Filter */}
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Filtrar por Término</label>
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <input type="text" placeholder="Data inicial" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary" />
+                      <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                    </div>
+                    <span className="text-gray-400 text-sm">até</span>
+                    <div className="relative flex-1">
+                      <input type="text" placeholder="Data final" className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary" />
+                      <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Tabs */}
-      <div className="flex overflow-x-auto scrollbar-hide border-b border-gray-200 mb-8 mt-2 pb-[1px]">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveSubTab(tab)}
-            className={`px-6 py-4 text-sm font-bold transition-all whitespace-nowrap border-b-[3px] ${
-              activeSubTab === tab 
-                ? 'border-[#F58220] text-[#F58220]' 
-                : 'border-transparent text-gray-500 hover:text-gray-800'
-            }`}
-          >
-            {tab}
-          </button>
+      {trilhasData.map((trilha) => (
+        <div key={trilha.id} className="bg-gray-50 rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col xl:flex-row gap-6 hover:shadow-md hover:border-gray-300 hover:bg-white transition-all relative overflow-hidden group">
+          {trilha.situacao === 'Concluído - Aprovado' && (
+            <div className="absolute top-0 left-0 w-1 h-full bg-green-500/80"></div>
+          )}
+          {trilha.situacao === 'Concluído - Reprovado' && (
+            <div className="absolute top-0 left-0 w-1 h-full bg-red-400/80"></div>
+          )}
+
+          {/* Esquerda: Informações da Trilha */}
+          <div className="flex-grow xl:w-1/2">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-7 h-7 bg-brand-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Compass className="w-4 h-4 text-brand-primary" />
+              </div>
+              <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${trilha.badgeColor}`}>
+                {trilha.situacao}
+              </span>
+            </div>
+
+            <h3 className="text-xl font-bold text-gray-900 leading-tight mb-4 pr-4">
+              {trilha.nome}
+            </h3>
+
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-gray-500">
+              {trilha.cargaHoraria !== '-' && (
+                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-gray-400"/> {trilha.cargaHoraria}</span>
+              )}
+              {trilha.inscricao !== '-' && (
+                <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-gray-400"/> Inscrito em: {trilha.inscricao}</span>
+              )}
+              {trilha.termino !== '-' && (
+                <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-green-600/60"/> Término: {trilha.termino}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Direita: Progresso e Ações */}
+          <div className="flex flex-col sm:flex-row xl:w-1/2 items-start xl:items-center justify-between gap-6 pt-5 xl:pt-0 border-t xl:border-t-0 xl:border-l border-gray-100 xl:pl-8">
+
+            {/* Medidores */}
+            <div className="flex flex-col gap-3 w-full xl:w-48 shrink-0">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Progresso</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex-grow h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${trilha.situacao === 'Concluído - Aprovado' ? 'bg-green-500' : trilha.situacao === 'Concluído - Reprovado' ? 'bg-red-400' : 'bg-brand-primary'}`}
+                      style={{ width: `${trilha.progresso}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-xs font-bold text-gray-700 w-12 text-right">{trilha.progresso.toFixed(2)}%</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Aproveitamento</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex-grow h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${trilha.situacao === 'Concluído - Aprovado' ? 'bg-green-500' : trilha.situacao === 'Concluído - Reprovado' ? 'bg-red-400' : 'bg-brand-primary'}`}
+                      style={{ width: `${trilha.aproveitamento}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-xs font-bold text-gray-700 w-12 text-right">{trilha.aproveitamento.toFixed(2)}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Ação Button Dinâmica */}
+            <div className="flex-shrink-0 w-full sm:w-auto flex flex-col gap-2">
+              {trilha.situacao === 'Em andamento' && (
+                <button className="w-full sm:w-auto bg-brand-primary hover:bg-[#E07010] text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
+                  <Play size={16} fill="currentColor" /> Continuar Trilha
+                </button>
+              )}
+
+              {trilha.situacao === 'Aguardando correção de avaliações' && (
+                <button disabled className="w-full sm:w-auto bg-gray-100/50 text-gray-400 cursor-not-allowed px-6 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2">
+                  <Clock size={16} /> Em Correção
+                </button>
+              )}
+
+              {(trilha.situacao === 'Concluído - Aprovado' || trilha.situacao === 'Concluído - Reprovado') && (
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                  <button className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                    <TrendingUp size={15} /> Desempenho
+                  </button>
+                  {trilha.situacao === 'Concluído - Aprovado' && (
+                    <button className="w-full sm:w-auto bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                      <Award size={15} /> Certificado
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      ))}
+
+      {/* Paginação */}
+      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+        <span className="text-xs text-gray-500">Mostrando de 1 até 5 de 12 registros</span>
+        <div className="flex gap-1">
+           <button className="px-3 py-1 border border-gray-200 rounded-md text-sm text-gray-500 hover:bg-gray-50">Anterior</button>
+           <button className="px-3 py-1 bg-brand-primary text-white rounded-md text-sm font-medium">1</button>
+           <button className="px-3 py-1 border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-50">2</button>
+           <button className="px-3 py-1 border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-50">3</button>
+           <button className="px-3 py-1 border border-gray-200 rounded-md text-sm text-gray-500 hover:bg-gray-50">Próximo</button>
+        </div>
+      </div>
+
+    </div>
+  );
+};
+
+const MyAreaCertificados = () => {
+  const certs = [
+    { id: 1, nome: 'Comunicação Assertiva no Trabalho', data: '10/03/2026', carga: '8h' },
+    { id: 2, nome: 'Gestão de Equipes Híbridas', data: '22/02/2026', carga: '12h' },
+    { id: 3, nome: 'Liderança em Momentos Críticos', data: '05/01/2026', carga: '6h' },
+  ];
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 rounded-full bg-brand-primary" />
+          <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Certificados Emitidos</span>
+        </div>
+        <span className="text-xs text-gray-400">{certs.length} certificado{certs.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {certs.map(c => (
+          <div key={c.id} className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col gap-4 hover:shadow-md hover:border-brand-primary/30 transition-all group">
+            <div className="flex items-start gap-3">
+              <div className="w-11 h-11 bg-brand-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Award size={22} className="text-brand-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 leading-tight text-sm">{c.nome}</h3>
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <span className="text-[10px] text-gray-400 flex items-center gap-1"><CheckCircle className="w-3 h-3 text-green-500" /> {c.data}</span>
+                  <span className="text-[10px] text-gray-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {c.carga}</span>
+                </div>
+              </div>
+            </div>
+            <button className="w-full bg-gray-50 border border-gray-200 hover:bg-brand-primary hover:border-brand-primary hover:text-white text-gray-600 rounded-xl py-2 text-sm font-semibold transition-all flex justify-center items-center gap-2">
+              <Download size={15} /> Baixar PDF
+            </button>
+          </div>
         ))}
       </div>
+    </div>
+  );
+};
 
-      {/* Dynamic Content area */}
-      <div className="min-h-[400px]">
+const MyAreaCalendario = () => {
+  const today = new Date();
+  const [currentDate, setCurrentDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [selectedDay, setSelectedDay] = useState(today);
+  const [newTaskText, setNewTaskText] = useState('');
+  const [newTaskPriority, setNewTaskPriority] = useState<'high' | 'medium' | 'low'>('medium');
+  const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'done'>('all');
+  const [tasks, setTasks] = useState([
+    { id: 1, title: 'Completar Módulo 3 — Liderança', done: false, priority: 'high', date: today },
+    { id: 2, title: 'Assistir aula gravada de Feedback', done: false, priority: 'medium', date: today },
+    { id: 3, title: 'Preencher pesquisa GPTW', done: true, priority: 'low', date: today },
+    { id: 4, title: 'Enviar trabalho Módulo 2', done: false, priority: 'high', date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1) },
+    { id: 5, title: 'Agendar sessão de mentoria', done: false, priority: 'medium', date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3) },
+  ]);
+
+  const events = [
+    { id: 1, date: today, time: '14:00', title: 'Aula ao vivo: Liderança em Momentos Críticos', color: '#FF7A1A', type: 'aula' },
+    { id: 2, date: today, time: '16:30', title: 'Prazo: Entrega do trabalho Módulo 2', color: '#EF4444', type: 'prazo' },
+    { id: 3, date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3), time: '10:00', title: 'Webinar: IA no Trabalho', color: '#2563EB', type: 'webinar' },
+    { id: 4, date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 8), time: '09:00', title: 'Treinamento Presencial: Excel Avançado', color: '#FF7A1A', type: 'treinamento' },
+    { id: 5, date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 13), time: '15:00', title: 'Avaliação: Comunicação Assertiva', color: '#EF4444', type: 'prazo' },
+    { id: 6, date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 18), time: '—', title: 'Nova trilha disponível: Gestão de Dados', color: '#10B981', type: 'trilha' },
+    { id: 7, date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 21), time: '11:00', title: 'Certificação: Comunicação Assertiva', color: '#F59E0B', type: 'cert' },
+  ];
+
+  const isSameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+  const yr = currentDate.getFullYear();
+  const mo = currentDate.getMonth();
+  const firstWeekday = new Date(yr, mo, 1).getDay();
+  const daysInMonth = new Date(yr, mo + 1, 0).getDate();
+  const cells: (Date | null)[] = [];
+  for (let i = 0; i < firstWeekday; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(yr, mo, d));
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const eventsForDay = (d: Date) => events.filter(e => isSameDay(e.date, d));
+  const selectedEvents = eventsForDay(selectedDay);
+  const pendingTasks = tasks.filter(t => !t.done).length;
+  const filteredTasks = tasks.filter(t =>
+    taskFilter === 'pending' ? !t.done : taskFilter === 'done' ? t.done : true
+  );
+  const cyclePriority = (id: number) =>
+    setTasks(prev => prev.map(t => t.id !== id ? t : {
+      ...t, priority: ({ high: 'medium', medium: 'low', low: 'high' } as Record<string,string>)[t.priority] as 'high'|'medium'|'low'
+    }));
+  const deleteTask = (id: number) => setTasks(prev => prev.filter(t => t.id !== id));
+  const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+  const priorityBadge: Record<string, string> = {
+    high: 'bg-red-50 text-red-600 border-red-200',
+    medium: 'bg-orange-50 text-orange-600 border-orange-200',
+    low: 'bg-gray-50 text-gray-500 border-gray-200',
+  };
+  const eventTypeIcon: Record<string, string> = { aula: '🎓', prazo: '⚠️', webinar: '💻', treinamento: '📚', trilha: '🧭', cert: '🏆' };
+
+  const addTask = () => {
+    if (!newTaskText.trim()) return;
+    setTasks(prev => [...prev, { id: Date.now(), title: newTaskText.trim(), done: false, priority: newTaskPriority, date: selectedDay }]);
+    setNewTaskText('');
+  };
+
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6">
+
+      {/* ── CALENDÁRIO ── */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        {/* Header do mês */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            {MONTHS[mo]} <span className="text-gray-400 font-medium">{yr}</span>
+          </h3>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1))}
+              className="px-3 py-1.5 text-xs font-bold text-brand-primary border border-brand-primary/30 rounded-lg hover:bg-brand-primary/5 transition"
+            >
+              Hoje
+            </button>
+            <button onClick={() => setCurrentDate(new Date(yr, mo - 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-500">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button onClick={() => setCurrentDate(new Date(yr, mo + 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-500">
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Nomes dos dias */}
+        <div className="grid grid-cols-7 border-b border-gray-100">
+          {DAYS.map(d => (
+            <div key={d} className="text-center text-[11px] font-bold text-gray-400 uppercase py-3 tracking-wider">{d}</div>
+          ))}
+        </div>
+
+        {/* Células dos dias */}
+        <div className="grid grid-cols-7 p-3 gap-1">
+          {cells.map((day, i) => {
+            if (!day) return <div key={i} />;
+            const isToday = isSameDay(day, today);
+            const isSel = isSameDay(day, selectedDay);
+            const dayEvents = eventsForDay(day);
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedDay(day)}
+                className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all min-h-[52px]
+                  ${isToday ? 'bg-brand-primary text-white shadow-sm' : isSel ? 'bg-brand-primary/10 text-brand-primary ring-1 ring-brand-primary/30' : 'hover:bg-gray-50 text-gray-700'}`}
+              >
+                <span className={`text-sm font-bold leading-none ${isToday ? 'text-white' : isSel ? 'text-brand-primary' : ''}`}>
+                  {day.getDate()}
+                </span>
+                {dayEvents.length > 0 && (
+                  <div className="flex gap-[3px] mt-1 flex-wrap justify-center">
+                    {dayEvents.slice(0, 3).map(ev => (
+                      <span key={ev.id} className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: isToday ? 'rgba(255,255,255,0.7)' : ev.color }} />
+                    ))}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Legenda */}
+        <div className="px-5 pb-4 flex flex-wrap gap-4">
+          {[['#FF7A1A','Aulas'],['#EF4444','Prazos'],['#2563EB','Webinars'],['#10B981','Trilhas'],['#F59E0B','Certificações']].map(([c, l]) => (
+            <div key={l} className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c as string }} />
+              <span className="text-[11px] text-gray-500 font-medium">{l}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── PAINEL LATERAL ── */}
+      <div className="flex flex-col gap-4">
+
+        {/* Eventos do dia selecionado */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                {isSameDay(selectedDay, today) ? 'Hoje' : DAYS[selectedDay.getDay()]}
+              </p>
+              <h4 className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                {selectedDay.getDate()} de {MONTHS[selectedDay.getMonth()]}
+              </h4>
+            </div>
+            {isSameDay(selectedDay, today) && (
+              <span className="bg-brand-primary/10 text-brand-primary text-xs font-bold px-3 py-1 rounded-full">Hoje</span>
+            )}
+          </div>
+
+          {selectedEvents.length === 0 ? (
+            <div className="text-center py-6">
+              <Calendar className="w-8 h-8 mx-auto text-gray-200 mb-2" />
+              <p className="text-sm text-gray-400">Sem eventos neste dia</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {selectedEvents.map(ev => {
+                const isOnline = ev.type === 'aula' || ev.type === 'webinar';
+                return (
+                  <div key={ev.id} className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                    <span className="text-lg leading-none mt-0.5">{eventTypeIcon[ev.type]}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 leading-tight">{ev.title}</p>
+                      {ev.time !== '—' && (
+                        <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {ev.time}
+                        </p>
+                      )}
+                      {isOnline && (
+                        <button className="mt-2 flex items-center gap-1.5 bg-brand-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity shadow-sm">
+                          <Play className="w-3 h-3" fill="currentColor" /> Acessar
+                        </button>
+                      )}
+                    </div>
+                    <div className="w-1 h-full min-h-[32px] rounded-full flex-shrink-0" style={{ backgroundColor: ev.color }} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Tarefas */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex-1">
+
+          {/* Header */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <h4 className="font-bold text-gray-900" style={{ fontFamily: 'Outfit, sans-serif' }}>Tarefas</h4>
+              {pendingTasks > 0 && (
+                <span className="bg-brand-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">{pendingTasks}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Filtros */}
+          <div className="flex gap-1 mb-4 bg-gray-100 rounded-lg p-1">
+            {([['all','Todas'], ['pending','Pendentes'], ['done','Concluídas']] as const).map(([val, label]) => (
+              <button
+                key={val}
+                onClick={() => setTaskFilter(val)}
+                className={`flex-1 text-xs font-bold py-1.5 rounded-md transition-all ${
+                  taskFilter === val ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Input nova tarefa */}
+          <div className="flex gap-2 mb-4">
+            {/* Seletor de prioridade */}
+            <button
+              onClick={() => setNewTaskPriority(p => ({ high: 'medium', medium: 'low', low: 'high' } as Record<string,'high'|'medium'|'low'>)[p])}
+              className={`px-2.5 py-2 rounded-lg text-[10px] font-bold uppercase border transition flex-shrink-0 ${priorityBadge[newTaskPriority]}`}
+              title="Clique para trocar a prioridade"
+            >
+              {newTaskPriority === 'high' ? 'Alta' : newTaskPriority === 'medium' ? 'Média' : 'Baixa'}
+            </button>
+            <input
+              type="text"
+              placeholder="Nova tarefa..."
+              value={newTaskText}
+              onChange={e => setNewTaskText(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && addTask()}
+              className="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition"
+            />
+            <button
+              onClick={addTask}
+              className="px-3 py-2 bg-brand-primary text-white rounded-lg text-sm font-bold hover:opacity-90 transition flex-shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Lista */}
+          <div className="space-y-1">
+            {filteredTasks.length === 0 && (
+              <p className="text-center text-sm text-gray-400 py-6">Nenhuma tarefa {taskFilter === 'pending' ? 'pendente' : taskFilter === 'done' ? 'concluída' : ''}</p>
+            )}
+            {filteredTasks.map(task => (
+              <div
+                key={task.id}
+                className={`flex items-center gap-2.5 py-2 px-2 rounded-lg transition-all group ${task.done ? 'opacity-60' : 'hover:bg-gray-50'}`}
+              >
+                {/* Checkbox */}
+                <button
+                  onClick={() => setTasks(prev => prev.map(t => t.id === task.id ? { ...t, done: !t.done } : t))}
+                  className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all
+                    ${task.done ? 'bg-brand-primary border-brand-primary' : 'border-gray-300 hover:border-brand-primary'}`}
+                >
+                  {task.done && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                </button>
+
+                {/* Título */}
+                <p className={`flex-1 text-sm min-w-0 leading-tight ${task.done ? 'line-through text-gray-400' : 'text-gray-700 font-medium'}`}>
+                  {task.title}
+                </p>
+
+                {/* Badge de prioridade — clicável para trocar */}
+                <button
+                  onClick={() => cyclePriority(task.id)}
+                  title="Clique para trocar a prioridade"
+                  className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border flex-shrink-0 transition-opacity hover:opacity-70 ${priorityBadge[task.priority]}`}
+                >
+                  {task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Média' : 'Baixa'}
+                </button>
+
+                {/* Botão deletar — aparece no hover */}
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
+                  title="Remover tarefa"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MyAreaView = () => {
+  const tabs = [
+    { label: 'Meus Treinamentos', icon: BookOpen },
+    { label: 'Minhas Trilhas', icon: Compass },
+    { label: 'Minhas Habilidades', icon: Brain },
+    { label: 'Meus Certificados', icon: Award },
+    { label: 'Meu Calendário', icon: Calendar },
+    { label: 'Minhas Compras', icon: ShoppingBag },
+  ];
+  const [activeSubTab, setActiveSubTab] = useState('Meus Treinamentos');
+
+  const stats = [
+    { label: 'Treinamentos', value: '5', sub: '1 concluído', icon: BookOpen },
+    { label: 'Trilhas', value: '3', sub: '1 em andamento', icon: Compass },
+    { label: 'Certificados', value: '3', sub: 'emitidos', icon: Award },
+    { label: 'Horas', value: '24h', sub: 'de aprendizado', icon: Clock },
+  ];
+
+  return (
+    <div className="bg-[#F7F9FC] min-h-[calc(100vh-64px)]">
+
+      {/* ── HEADER BANNER ── */}
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #041433 0%, #0a2254 100%)' }}>
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 15% 60%, #FF7A1A 0%, transparent 50%), radial-gradient(circle at 85% 20%, #2563EB 0%, transparent 45%)' }} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-8 relative">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+            <img
+              src="https://ui-avatars.com/api/?name=Caio+Gomes&background=FF7A1A&color=fff&size=80"
+              alt="Caio Gomes"
+              className="w-16 h-16 rounded-full border-2 border-white/20 shadow-lg flex-shrink-0"
+            />
+            <div className="flex-1">
+              <p className="text-white/50 text-sm font-medium">Bem-vindo de volta,</p>
+              <h1 className="text-white font-bold text-2xl leading-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>Caio Gomes</h1>
+              <p className="text-white/50 text-sm mt-0.5">Engenharia de Software · Analista SR</p>
+            </div>
+          </div>
+
+          {/* Stats rápidos */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+            {stats.map(s => (
+              <div key={s.label} className="rounded-xl px-4 py-3 border border-white/10" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <s.icon className="w-3.5 h-3.5 text-brand-primary" />
+                  <span className="text-white/50 text-[11px] font-medium">{s.label}</span>
+                </div>
+                <p className="text-white font-bold text-xl leading-none" style={{ fontFamily: 'Outfit, sans-serif' }}>{s.value}</p>
+                <p className="text-white/40 text-[11px] mt-0.5">{s.sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── SUB-TABS ── */}
+      <div className="bg-white border-b border-gray-200 sticky top-[64px] z-30 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
+          <div className="flex overflow-x-auto scrollbar-hide pb-[1px] gap-1">
+            {tabs.map(({ label, icon: Icon }) => (
+              <button
+                key={label}
+                onClick={() => setActiveSubTab(label)}
+                className={`flex items-center gap-2 px-5 py-4 text-sm font-bold transition-all whitespace-nowrap border-b-[3px] flex-shrink-0 ${
+                  activeSubTab === label
+                    ? 'border-brand-primary text-brand-primary'
+                    : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-200'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── CONTEÚDO ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-8 min-h-[400px]">
         {activeSubTab === 'Meus Treinamentos' && <MyAreaTreinamentos />}
         {activeSubTab === 'Minhas Trilhas' && <MyAreaTrilhas />}
         {activeSubTab === 'Minhas Habilidades' && <MyAreaHabilidades />}
         {activeSubTab === 'Meus Certificados' && <MyAreaCertificados />}
         {activeSubTab === 'Meu Calendário' && <MyAreaCalendario />}
         {activeSubTab === 'Minhas Compras' && (
-          <div className="text-center py-20 text-gray-500">
-            <ShoppingBag className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p className="font-medium text-gray-600">Nenhuma compra recente.</p>
-            <p className="text-sm mt-1">Quando você realizar uma compra ou upgrade, ela aparecerá aqui.</p>
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-20 h-20 bg-brand-primary/10 rounded-2xl flex items-center justify-center mb-5">
+              <ShoppingBag className="w-10 h-10 text-brand-primary/40" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>Nenhuma compra ainda</h3>
+            <p className="text-gray-500 text-sm max-w-xs">Quando você adquirir um treinamento ou upgrade de plano, ele aparecerá aqui.</p>
+            <button className="mt-6 bg-brand-primary text-white px-6 py-2.5 rounded-full font-semibold hover:opacity-90 transition text-sm shadow-sm">
+              Explorar Treinamentos
+            </button>
           </div>
         )}
       </div>
@@ -1534,15 +2735,159 @@ const MyAreaView = () => {
   );
 };
 
-const Hero = ({ layoutVersion = 1 }: { layoutVersion?: number }) => {
+const HERO_SLIDES_DEFAULT = [
+  {
+    id: 'slide-1',
+    badge: 'Plataforma Lector • Educação Corporativa',
+    title: (
+      <>
+        Diagnóstico do<br />
+        ambiente de trabalho<br />
+        <span className="text-gradient-orange">que transforma resultados.</span>
+      </>
+    ),
+    description:
+      'Desenvolva habilidades práticas e certificações alinhadas às necessidades da empresa. Um único ecossistema para conteúdo, trilhas e evolução contínua.',
+    card: (
+      <div className="relative rounded-3xl overflow-hidden aspect-[4/5] glass-dark">
+        <img
+          src={heroYoungProfessional}
+          alt="Profissional jovem"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-navy-900/60 via-transparent to-transparent pointer-events-none" />
+      </div>
+    ),
+  },
+  {
+    id: 'slide-2',
+    badge: 'Novidade • Avaliação Copsoq',
+    title: (
+      <>
+        Avaliação <span className="text-gradient-orange">Copsoq</span><br />
+        já disponível
+      </>
+    ),
+    description:
+      'Mensure os fatores psicossociais do ambiente de trabalho com o instrumento Copsoq e gere planos de ação baseados em evidências.',
+    card: (
+      <div className="relative rounded-3xl overflow-hidden aspect-[4/5] p-6 flex flex-col justify-between"
+           style={{ background: 'linear-gradient(135deg, #08204D 0%, #0F2D6B 60%, #FF7A1A 140%)' }}>
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-white text-[10px] font-semibold tracking-wide">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+            DISPONÍVEL AGORA
+          </span>
+          <Shield className="w-5 h-5 text-white/70" />
+        </div>
+        <div>
+          <p className="text-white/60 text-xs uppercase tracking-widest font-semibold">Avaliação</p>
+          <h3 className="mt-2 text-3xl font-display font-bold text-white leading-tight">Copsoq</h3>
+          <p className="mt-3 text-sm text-white/70 leading-relaxed">
+            Riscos psicossociais, clima e bem-estar em uma única jornada de aplicação.
+          </p>
+          <button className="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 transition-colors text-white text-sm font-semibold">
+            Iniciar avaliação <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+    ),
+  },
+];
+
+const HERO_SLIDES_QA = [
+  {
+    id: 'qa-slide-1',
+    badge: 'Time QA • Lector Live',
+    title: (
+      <>
+        Garanta que o que foi<br />
+        prometido <span className="text-gradient-orange">realmente funciona.</span>
+      </>
+    ),
+    description:
+      'Biblioteca completa do time de QA: do onboarding ao checklist completo do sistema. Valide fluxos, documente chamados e evite regressões com processos sólidos.',
+    card: (
+      <div className="relative rounded-3xl overflow-hidden aspect-[4/5] p-6 flex flex-col justify-between"
+           style={{ background: 'linear-gradient(135deg, #082040 0%, #0c2d5e 55%, #0EA5E9 160%)' }}>
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-white text-[10px] font-semibold tracking-wide">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+            BIBLIOTECA QA
+          </span>
+          <Shield className="w-5 h-5 text-sky-300/70" />
+        </div>
+        <div className="space-y-2">
+          {['Validar fluxo completo', 'Evitar regressão', 'Organizar processo', 'Documentar chamados'].map(item => (
+            <div key={item} className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-sky-400/20 border border-sky-400/40 flex items-center justify-center flex-shrink-0">
+                <Check className="w-2.5 h-2.5 text-sky-300" />
+              </div>
+              <span className="text-sm text-white/80">{item}</span>
+            </div>
+          ))}
+        </div>
+        <div>
+          <p className="text-white/50 text-xs uppercase tracking-widest font-semibold">QA</p>
+          <h3 className="mt-1 text-2xl font-display font-bold text-white leading-tight">Lector Live</h3>
+          <p className="mt-2 text-sm text-white/60">11 treinamentos · 11 trilhas</p>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'qa-slide-2',
+    badge: 'Automação • Testes em Escala',
+    title: (
+      <>
+        Automatize fluxos críticos,<br />
+        <span className="text-gradient-orange">previna regressões.</span>
+      </>
+    ),
+    description:
+      'Aprenda a estruturar testes independentes, escolher o que automatizar e manter a suíte atualizada a cada liberação — sem aumentar a complexidade do processo.',
+    card: (
+      <div className="relative rounded-3xl overflow-hidden aspect-[4/5] p-6 flex flex-col justify-between"
+           style={{ background: 'linear-gradient(135deg, #061830 0%, #0a2550 60%, #FF7A1A 160%)' }}>
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-white text-[10px] font-semibold tracking-wide">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
+            AUTOMAÇÃO
+          </span>
+          <Code className="w-5 h-5 text-white/50" />
+        </div>
+        <div className="space-y-1.5">
+          {['Login e autenticação', 'Matrícula e pagamento', 'Trilhas e progresso', 'Vitrines e treinamentos'].map(item => (
+            <div key={item} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-1.5 border border-white/10">
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
+              <span className="text-xs text-white/75 font-mono">{item}</span>
+            </div>
+          ))}
+        </div>
+        <div>
+          <p className="text-white/50 text-xs uppercase tracking-widest font-semibold">Fluxos Críticos</p>
+          <h3 className="mt-1 text-2xl font-display font-bold text-white leading-tight">Candidatos naturais</h3>
+          <p className="mt-2 text-sm text-white/60">Alto impacto · Recorrentes · Bem definidos</p>
+        </div>
+      </div>
+    ),
+  },
+];
+
+const Hero = ({ layoutVersion = 1, activeVitrineId = 'v1' }: { layoutVersion?: number; activeVitrineId?: string }) => {
   const [currentBanner, setCurrentBanner] = useState(0);
 
   useEffect(() => {
+    setCurrentBanner(0);
+  }, [activeVitrineId]);
+
+  useEffect(() => {
+    const slides = activeVitrineId === 'v7' ? HERO_SLIDES_QA : HERO_SLIDES_DEFAULT;
     const timer = setInterval(() => {
-      setCurrentBanner((prev) => (prev + 1) % BANNERS.length);
+      setCurrentBanner((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeVitrineId]);
 
   if (layoutVersion === 2) {
     return (
@@ -1618,68 +2963,7 @@ const Hero = ({ layoutVersion = 1 }: { layoutVersion?: number }) => {
     );
   }
 
-  const slides = [
-    {
-      id: 'slide-1',
-      badge: 'Plataforma Lector • Educação Corporativa',
-      title: (
-        <>
-          Diagnóstico do<br />
-          ambiente de trabalho<br />
-          <span className="text-gradient-orange">que transforma resultados.</span>
-        </>
-      ),
-      description:
-        'Desenvolva habilidades práticas e certificações alinhadas às necessidades da empresa. Um único ecossistema para conteúdo, trilhas e evolução contínua.',
-      card: (
-        <div className="relative rounded-3xl overflow-hidden aspect-[4/5] glass-dark">
-          <img
-            src={heroYoungProfessional}
-            alt="Profissional jovem"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-navy-900/60 via-transparent to-transparent pointer-events-none" />
-        </div>
-      ),
-    },
-    {
-      id: 'slide-2',
-      badge: 'Novidade • Avaliação Copsoq',
-      title: (
-        <>
-          Avaliação <span className="text-gradient-orange">Copsoq</span><br />
-          já disponível
-        </>
-      ),
-      description:
-        'Mensure os fatores psicossociais do ambiente de trabalho com o instrumento Copsoq e gere planos de ação baseados em evidências.',
-      card: (
-        <div className="relative rounded-3xl overflow-hidden aspect-[4/5] p-6 flex flex-col justify-between"
-             style={{ background: 'linear-gradient(135deg, #08204D 0%, #0F2D6B 60%, #FF7A1A 140%)' }}>
-          <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-white text-[10px] font-semibold tracking-wide">
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-              DISPONÍVEL AGORA
-            </span>
-            <Shield className="w-5 h-5 text-white/70" />
-          </div>
-          <div>
-            <p className="text-white/60 text-xs uppercase tracking-widest font-semibold">Avaliação</p>
-            <h3 className="mt-2 text-3xl font-display font-bold text-white leading-tight">
-              Copsoq
-            </h3>
-            <p className="mt-3 text-sm text-white/70 leading-relaxed">
-              Riscos psicossociais, clima e bem-estar em uma única jornada de aplicação.
-            </p>
-            <button className="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 transition-colors text-white text-sm font-semibold">
-              Iniciar avaliação <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
-      ),
-    },
-  ];
-
+  const slides = activeVitrineId === 'v7' ? HERO_SLIDES_QA : HERO_SLIDES_DEFAULT;
   const slide = slides[currentBanner % slides.length];
 
   return (
@@ -1827,7 +3111,7 @@ const HeroV2 = () => {
               className="w-full pl-12 pr-32 py-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all duration-300 text-sm"
             />
             <Search className="absolute left-4 top-[18px] h-5 w-5 text-gray-400" />
-            <button className="absolute right-2 top-2 bottom-2 bg-[#F58220] hover:bg-[#E07010] text-white px-8 rounded-lg font-medium transition-colors">
+            <button className="absolute right-2 top-2 bottom-2 bg-brand-primary hover:bg-[#E07010] text-white px-8 rounded-lg font-medium transition-colors">
               Buscar
             </button>
           </div>
@@ -2917,58 +4201,78 @@ const ThemeSwitcher = ({
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('Conteúdo');
-  const [showSocialSidebar] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeVitrineId, setActiveVitrineId] = useState('v1');
+
+  const handleMenuToggle = useCallback(() => setIsSidebarOpen(v => !v), []);
+  const handleSidebarClose = useCallback(() => setIsSidebarOpen(false), []);
+  const handleVitrineChange = useCallback((id: string) => setActiveVitrineId(id), []);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <main className="flex-grow">
-        <AnimatePresence mode="wait">
-          {activeTab === 'Conteúdo' && (
-            <motion.div
-              key="conteudo"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <Hero />
-              <div className="bg-[#F7F9FC] py-12 border-t border-slate-200/70">
-                <div className="max-w-[1600px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-                  <div className="flex-1 overflow-hidden">
-                    {SECTIONS.filter((section) => section.variant === 'avancado-1').map((section) => (
-                      <ContentSection key={section.id} section={section} />
-                    ))}
+    <div className="min-h-screen bg-white">
+      <Topbar
+        onMenuToggle={handleMenuToggle}
+        setActiveTab={setActiveTab}
+      />
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isOpen={isSidebarOpen}
+        onClose={handleSidebarClose}
+        activeVitrineId={activeVitrineId}
+        setActiveVitrineId={handleVitrineChange}
+      />
+      {/* Content offset: pt-16 for topbar, lg:pl-64 for sidebar */}
+      <div className="pt-16 lg:pl-64">
+        <main className="min-h-[calc(100vh-64px)]">
+          <AnimatePresence mode="wait">
+            {activeTab === 'Conteúdo' && (
+              <motion.div
+                key="conteudo"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <Hero activeVitrineId={activeVitrineId} />
+                <div className="bg-[#F7F9FC] py-12 border-t border-slate-200/70">
+                  <div className="max-w-[1600px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
+                    <div className="flex-1 overflow-hidden">
+                      {SECTIONS
+                        .filter(s => (VITRINE_SECTIONS[activeVitrineId] ?? ['a1', 't1']).includes(s.id))
+                        .map(section => (
+                          <ContentSection key={section.id} section={section} />
+                        ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
-          {activeTab === 'Social' && (
-            <motion.div
-              key="social"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <SocialView />
-            </motion.div>
-          )}
+            {activeTab === 'Social' && (
+              <motion.div
+                key="social"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <SocialView />
+              </motion.div>
+            )}
 
-          {activeTab === 'Minha Área' && (
-            <motion.div
-              key="minha-area"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <MyAreaView />
-            </motion.div>
-          )}
-
-        </AnimatePresence>
-      </main>
-      <Footer />
+            {activeTab === 'Minha Área' && (
+              <motion.div
+                key="minha-area"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <MyAreaView />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }
