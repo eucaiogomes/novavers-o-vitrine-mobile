@@ -563,7 +563,7 @@ const VitrineBar = ({
   return (
     <div className="bg-white border-b border-gray-100 sticky top-14 z-40">
       <div className="max-w-[1600px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-3">
-        <div className="max-w-[1680px] mx-auto bg-white border border-gray-200 rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.09)] px-4 py-3">
+        <div className="max-w-[1680px] mx-auto bg-white border border-gray-200 rounded-3xl shadow-sm px-4 py-3">
           <div className="mb-3 text-sm text-slate-600">
             <span className="font-semibold text-slate-800">Escolha sua vitrine</span>
             <span className="inline-block ml-2 text-slate-500">Filtre por categoria e subcategoria</span>

@@ -503,6 +503,59 @@ const CATEGORY_DATA = {
 };
 
 // ============================================================
+// VITRINE BREADCRUMB
+// ============================================================
+const VitrineBreadcrumb = ({ activeVitrineId }: { activeVitrineId: string }) => {
+  const vitrine = VITRINES.find(v => v.id === activeVitrineId);
+  if (!vitrine) return null;
+
+  let catLabel: string | null = null;
+  let subLabel: string | null = null;
+
+  for (const [key, data] of Object.entries(CATEGORY_DATA)) {
+    if (key === 'all') continue;
+    if ((data as any).vitrines?.includes(activeVitrineId)) {
+      catLabel = (data as any).label;
+      for (const sub of (data as any).subs ?? []) {
+        if (sub.vitriIds?.includes(activeVitrineId)) {
+          subLabel = sub.label;
+          break;
+        }
+      }
+      break;
+    }
+  }
+
+  const crumbs: { label: string; color?: string }[] = [
+    { label: catLabel ?? vitrine.categoria },
+    ...(subLabel ? [{ label: subLabel }] : []),
+    { label: vitrine.nome, color: vitrine.cor },
+  ];
+
+  return (
+    <div className="flex items-center gap-1.5 mb-3">
+      {crumbs.map((crumb, i) => (
+        <React.Fragment key={i}>
+          {i > 0 && (
+            <span className="text-gray-300 text-xs select-none">›</span>
+          )}
+          <span
+            className={`text-xs ${
+              i === crumbs.length - 1
+                ? 'font-semibold text-gray-700'
+                : 'text-gray-400 font-normal'
+            }`}
+            style={crumb.color && i === crumbs.length - 1 ? { color: crumb.color } : undefined}
+          >
+            {crumb.label}
+          </span>
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
+
+// ============================================================
 // VITRINE BAR
 // ============================================================
 
@@ -548,154 +601,97 @@ const VitrineBar = ({
   const categoryData = (CATEGORY_DATA[activeCategory] ?? CATEGORY_DATA.all) as any;
   const availableVitrineIds = getVitrineIdsByFilter(activeCategory, activeSub);
   const availableVitrines = VITRINES.filter((v) => availableVitrineIds.includes(v.id));
-  const showSubsection = activeCategory !== 'all' && !!categoryData.subs?.length;
-  const showVitrineSection = activeCategory === 'all' || activeSub !== null || categoryData.subs?.length === 0;
 
   const selectCategory = (categoryId: string) => {
+    const ids = getVitrineIdsByFilter(categoryId, null);
+    if (!ids.includes(activeVitrineId)) {
+      setActiveVitrineId(ids[0] ?? activeVitrineId);
+    }
     setActiveCategory(categoryId);
     setActiveSub(null);
   };
 
   const selectSub = (subId: string | null) => {
+    const ids = getVitrineIdsByFilter(activeCategory, subId);
+    if (!ids.includes(activeVitrineId)) {
+      setActiveVitrineId(ids[0] ?? activeVitrineId);
+    }
     setActiveSub(subId);
   };
 
   return (
     <div className="bg-white border-b border-gray-100 sticky top-14 z-40">
-      <div className="max-w-[1600px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-3">
-        <div className="max-w-[1680px] mx-auto bg-white border border-gray-200 rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.09)] px-4 py-3">
-          <div className="mb-3 text-sm text-slate-600">
-            <span className="font-semibold text-slate-800">Escolha sua vitrine</span>
-            <span className="inline-block ml-2 text-slate-500">Filtre por categoria e subcategoria</span>
+      <div className="max-w-[1600px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-4">
+        <div className="bg-white border border-gray-200 rounded-[28px] shadow-sm p-4">
+          <div className="mb-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 mb-3">Categoria</p>
+            <div className="flex flex-wrap gap-2 items-center">
+              {categories.map(([categoryId, category]) => {
+                const isActive = categoryId === activeCategory;
+                return (
+                  <button
+                    key={categoryId}
+                    onClick={() => selectCategory(categoryId)}
+                    className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition-all duration-150 whitespace-nowrap ${
+                      isActive
+                        ? 'border-orange-300 bg-orange-50 text-orange-700'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {(category as any).label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="mb-2 text-xs text-slate-500">Categoria</div>
-          <div className="flex flex-wrap gap-2 items-center">
-            {categories.map(([categoryId, category]) => {
-              const isActive = categoryId === activeCategory;
-              return (
-                <button
-                  key={categoryId}
-                  onClick={() => selectCategory(categoryId)}
-                  className={`rounded-2xl border px-4 py-2 min-h-[38px] min-w-[130px] text-sm font-semibold transition-all duration-150 whitespace-nowrap ${
-                    isActive
-                      ? 'border-orange-500 bg-orange-50 text-orange-700'
-                      : 'border-gray-200 bg-white text-slate-700 hover:border-gray-300 hover:bg-slate-50'
-                  }`}
-                >
-                  {(category as any).label}
-                </button>
-              );
-            })}
+          {categoryData.subs?.length && activeCategory !== 'all' ? (
+            <div className="mb-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 mb-3">Subcategoria</p>
+              <div className="flex flex-wrap gap-2 items-center">
+                {categoryData.subs.map((sub: any) => {
+                  const isActive = activeSub === sub.id;
+                  return (
+                    <button
+                      key={sub.id}
+                      onClick={() => selectSub(sub.id)}
+                      className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition-all duration-150 whitespace-nowrap ${
+                        isActive
+                          ? 'border-sky-300 bg-sky-50 text-sky-700'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {sub.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 mb-3">Vitrine</p>
+            <div className="flex flex-wrap gap-2 items-center">
+              {availableVitrines.map((vitrine) => {
+                const isActive = vitrine.id === activeVitrineId;
+                return (
+                  <button
+                    key={vitrine.id}
+                    onClick={() => setActiveVitrineId(vitrine.id)}
+                    className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition-all duration-150 whitespace-nowrap ${
+                      isActive
+                        ? 'border-orange-500 bg-orange-50 text-orange-700'
+                        : 'border-gray-200 bg-slate-50 text-slate-700 hover:border-gray-300 hover:bg-slate-100'
+                    }`}
+                  >
+                    {vitrine.nome}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-
-          <AnimatePresence initial={false}>
-            {showSubsection ? (
-              <motion.div
-                key="subsection"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="overflow-hidden"
-              >
-                <div className="mt-3 mb-2 text-xs text-slate-500">Subcategoria</div>
-                <div className="flex flex-wrap gap-2 items-center">
-                  {categoryData.subs.map((sub: any) => {
-                    const isActive = activeSub === sub.id;
-                    return (
-                      <button
-                        key={sub.id}
-                        onClick={() => selectSub(sub.id)}
-                        className={`rounded-2xl border px-4 py-2 min-h-[38px] min-w-[130px] text-sm font-medium transition-all duration-150 whitespace-nowrap ${
-                          isActive
-                            ? 'border-orange-500 bg-orange-50 text-orange-700'
-                            : 'border-gray-200 bg-slate-50 text-slate-600 hover:border-gray-300 hover:bg-slate-100'
-                        }`}
-                      >
-                        {sub.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-
-          <AnimatePresence initial={false}>
-            {showVitrineSection ? (
-              <motion.div
-                key="vitrineSection"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="overflow-hidden"
-              >
-                <div className="mt-3 mb-2 text-xs text-slate-500">Vitrine</div>
-                <div className="flex flex-wrap gap-2 items-center">
-                  {availableVitrines.map((vitrine) => {
-                    const isActive = vitrine.id === activeVitrineId;
-                    return (
-                      <button
-                        key={vitrine.id}
-                        onClick={() => setActiveVitrineId(vitrine.id)}
-                        className={`rounded-2xl border px-4 py-2 min-h-[38px] min-w-[130px] text-sm font-semibold transition-all duration-150 whitespace-nowrap ${
-                          isActive
-                            ? 'border-orange-500 bg-orange-50 text-orange-700'
-                            : 'border-gray-200 bg-slate-50 text-slate-700 hover:border-gray-300 hover:bg-slate-100'
-                        }`}
-                      >
-                        {vitrine.nome}
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
         </div>
       </div>
-    </div>
-  );
-};
-
-const VitrineBreadcrumb = ({ activeVitrineId }: { activeVitrineId: string }) => {
-  const vitrine = VITRINES.find(v => v.id === activeVitrineId);
-  if (!vitrine) return null;
-
-  let catLabel: string = vitrine.categoria;
-  let subLabel: string | null = null;
-
-  for (const [key, data] of Object.entries(CATEGORY_DATA)) {
-    if (key === 'all') continue;
-    if ((data as any).vitrines?.includes(activeVitrineId)) {
-      catLabel = (data as any).label;
-      const sub = (data as any).subs?.find((item: any) => item.vitriIds?.includes(activeVitrineId));
-      if (sub) subLabel = sub.label;
-      break;
-    }
-  }
-
-  const crumbs = [
-    { label: catLabel },
-    ...(subLabel ? [{ label: subLabel }] : []),
-    { label: vitrine.nome, color: vitrine.cor },
-  ];
-
-  return (
-    <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 mb-6">
-      {crumbs.map((crumb, i) => (
-        <React.Fragment key={i}>
-          {i > 0 && <span className="text-slate-400">›</span>}
-          <span
-            className={`text-sm ${i === crumbs.length - 1 ? 'font-semibold text-slate-900' : 'text-slate-500'}`}
-            style={crumb.color && i === crumbs.length - 1 ? { color: crumb.color } : undefined}
-          >
-            {crumb.label}
-          </span>
-        </React.Fragment>
-      ))}
     </div>
   );
 };
