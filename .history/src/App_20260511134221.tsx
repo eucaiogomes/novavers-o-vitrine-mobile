@@ -677,7 +677,7 @@ const VitrineBreadcrumb = ({ activeVitrineId }: { activeVitrineId: string }) => 
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 mb-3">
+    <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 mb-6">
       {crumbs.map((crumb, i) => (
         <React.Fragment key={i}>
           {i > 0 && <span className="text-slate-400">›</span>}

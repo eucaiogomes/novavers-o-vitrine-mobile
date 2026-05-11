@@ -566,7 +566,6 @@ const VitrineBar = ({
         <div className="max-w-[1680px] mx-auto bg-white border border-gray-200 rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.09)] px-4 py-3">
           <div className="flex flex-wrap gap-2 items-center">
             {categories.map(([categoryId, category]) => {
-              if (categoryId === 'all') return null;
               const isActive = categoryId === activeCategory;
               return (
                 <button
@@ -677,7 +676,7 @@ const VitrineBreadcrumb = ({ activeVitrineId }: { activeVitrineId: string }) => 
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 mb-3">
+    <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 mb-6">
       {crumbs.map((crumb, i) => (
         <React.Fragment key={i}>
           {i > 0 && <span className="text-slate-400">›</span>}
@@ -4628,7 +4627,7 @@ export default function App() {
               >
                 <Hero activeVitrineId={activeVitrineId} />
                 <VitrineBar activeVitrineId={activeVitrineId} setActiveVitrineId={handleVitrineChange} />
-                <div className="bg-[#F7F9FC] py-4 border-t border-slate-200/70">
+                <div className="bg-[#F7F9FC] py-12 border-t border-slate-200/70">
                   <div className="max-w-[1600px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
                     <VitrineBreadcrumb activeVitrineId={activeVitrineId} />
                     <div className="flex-1 overflow-hidden">
