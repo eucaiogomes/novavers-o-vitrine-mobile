@@ -1,0 +1,23 @@
+# Dependências
+node_modules/
+
+# Build (a Vercel gera o build a partir do código-fonte)
+dist/
+
+# Variáveis de ambiente
+.env
+.env.local
+.env.*.local
+
+# Histórico de editores e arquivos de sistema
+.history/
+.DS_Store
+Thumbs.db
+*.log
+
+# Material de referência local (não faz parte do app)
+hello-reader-56616d9e/
+html de como eu gostriar que ficassem organizadas as categotrias/
+logo lector/
+tela treinamento e trilha/
+vitrine-final-clone/

@@ -59,6 +59,12 @@
   body {
     @apply font-sans bg-[#F7F9FC] text-slate-900;
   }
+
+  /* Sensação iOS: o feedback de toque vem dos estados active:, não do highlight nativo */
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
 }
 
 @layer components {
