@@ -31,6 +31,13 @@
   --shadow-hover: 0 10px 28px rgba(4, 20, 51, 0.14);
   --shadow-glow-orange: 0 8px 24px rgba(255, 122, 26, 0.28);
 
+  /* Support bubble tokens extracted from the provided reference */
+  --support-bubble-bg: #EB6200;
+  --support-bubble-fg: #FFFFFF;
+  --support-bubble-size: 36px;
+  --support-bubble-icon-size: 20px;
+  --support-bubble-shadow: 0 8px 18px rgba(235, 98, 0, 0.32);
+
   /* Brand tokens used by training/trilha views */
   --brand-color: #FF7A1A;
   --brand-color-dark: #F2680D;
@@ -87,6 +94,14 @@
 
   .btn-ghost-light {
     @apply text-white/90 border border-white/20 hover:bg-white/10 px-6 py-3 rounded-xl font-semibold transition-all duration-200;
+  }
+
+  .support-bubble {
+    width: var(--support-bubble-size);
+    height: var(--support-bubble-size);
+    background: var(--support-bubble-bg);
+    color: var(--support-bubble-fg);
+    box-shadow: var(--support-bubble-shadow);
   }
 
   /* Orbital decorative pattern (used in hero / banners) */

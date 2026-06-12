@@ -14,7 +14,10 @@ type ChatMsg = {
   anexo?: string;
 };
 
+export const SUPPORT_CHAT_ID = 'suporte-lector';
+
 const CHAT_CONVERSAS = [
+  { id: SUPPORT_CHAT_ID, nome: 'Suporte Lector', sub: 'Atendimento Lector', avatar: 'https://picsum.photos/seed/supportLector/100/100', online: true,  grupo: false },
   { id: 'chat1', nome: 'Caio Thiago',   sub: 'Suporte',           avatar: 'https://picsum.photos/seed/chatA/100/100', online: true,  grupo: false },
   { id: 'chat2', nome: 'Time QA',       sub: 'Guilherme, Luiz Fellipe, Mikaelle, Thiago', avatar: '', online: false, grupo: true  },
   { id: 'chat3', nome: 'Luiz Fellipe',  sub: 'Desenvolvimento',   avatar: 'https://picsum.photos/seed/chatB/100/100', online: true,  grupo: false },
@@ -31,6 +34,9 @@ const CHAT_USUARIOS = [
 ];
 
 const CHAT_MENSAGENS_INICIAIS: Record<string, ChatMsg[]> = {
+  [SUPPORT_CHAT_ID]: [
+    { id: 's1', texto: 'Olá! Você está falando com o suporte da Lector. Como podemos ajudar?', hora: 'Agora' },
+  ],
   chat1: [
     { id: 'm1', texto: 'Bom dia! Conseguiu validar o certificado da turma?', hora: '10:38' },
     { id: 'm2', texto: 'Bom dia! Sim, validei agora pela manhã', hora: '10:40', propria: true },
@@ -71,9 +77,11 @@ const CHAT_AUTOR_CORES: Record<string, string> = {
 export const ChatScreen = ({
   isOpen,
   onClose,
+  initialConversationId,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  initialConversationId?: string | null;
 }) => {
   const [aba, setAba] = useState<'conversas' | 'usuarios'>('conversas');
   const [busca, setBusca] = useState('');
@@ -84,8 +92,22 @@ export const ChatScreen = ({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isOpen) { setConversaAtiva(null); setBusca(''); setMensagem(''); setAba('conversas'); }
-  }, [isOpen]);
+    if (!isOpen) {
+      setConversaAtiva(null);
+      setBusca('');
+      setMensagem('');
+      setAba('conversas');
+      return;
+    }
+
+    if (initialConversationId) {
+      setAba('conversas');
+      setBusca('');
+      setMensagem('');
+      setNaoLidas(prev => ({ ...prev, [initialConversationId]: 0 }));
+      setConversaAtiva(initialConversationId);
+    }
+  }, [isOpen, initialConversationId]);
 
   // Sempre rolar para a última mensagem
   useEffect(() => {

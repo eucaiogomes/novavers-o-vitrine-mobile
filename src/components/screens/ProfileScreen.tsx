@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronLeft, ChevronRight, Bell, Award, MessageSquare, Play, Compass,
-  Star, Calendar, ShoppingBag, Users, User, Check, Globe, Download,
-  CheckCircle, BookOpen, LogOut,
+  Calendar, ShoppingBag, Users, User, Check, Globe, Download,
+  CheckCircle, BookOpen, LogOut, LayoutDashboard, LayoutGrid, Star, Accessibility,
 } from 'lucide-react';
 import { PROFILE_NOTIFICATION_COUNT } from './NotificationsScreen';
 
@@ -14,6 +14,7 @@ const ProfileRow = ({
   onClick,
   danger,
   last,
+  strong,
 }: {
   icon: React.ElementType;
   label: string;
@@ -21,6 +22,7 @@ const ProfileRow = ({
   onClick?: () => void;
   danger?: boolean;
   last?: boolean;
+  strong?: boolean;
 }) => (
   <>
     <button
@@ -30,7 +32,7 @@ const ProfileRow = ({
       }`}
     >
       <Icon className={`h-[18px] w-[18px] flex-shrink-0 ${danger ? 'text-red-400' : 'text-gray-400'}`} />
-      <span className="flex-1 text-left text-[15px]">{label}</span>
+      <span className={`flex-1 text-left text-[15px] ${strong ? 'font-semibold' : ''}`}>{label}</span>
       {value && <span className="text-[15px] text-gray-400 mr-1">{value}</span>}
       {!danger && <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#C7C7CC' }} />}
     </button>
@@ -38,10 +40,47 @@ const ProfileRow = ({
   </>
 );
 
-const ProfileSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div className="mb-6">
-    <p className="text-[13px] text-gray-500 font-normal px-4 mb-1 uppercase tracking-wide">{label}</p>
-    <div className="bg-white rounded-2xl overflow-hidden mx-4">{children}</div>
+// Grupo recolhível — mesmo padrão das categorias da sidebar de vitrines:
+// header com label, pill contadora e chevron que gira 90°; conteúdo expande no lugar
+const ProfileGroup = ({
+  icon: Icon,
+  label,
+  isOpen,
+  onToggle,
+  children,
+}: {
+  icon: React.ElementType;
+  label: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) => (
+  <div className="bg-white rounded-2xl overflow-hidden mx-4 mb-3">
+    <button
+      onClick={onToggle}
+      className="w-full flex items-center gap-3 px-4 min-h-[52px] active:bg-gray-100 transition-colors"
+    >
+      <Icon className="h-[18px] w-[18px] flex-shrink-0 text-gray-400" />
+      <span className={`flex-1 text-left text-[15px] font-semibold ${isOpen ? 'text-brand-primary' : 'text-gray-900'}`}>
+        {label}
+      </span>
+      <motion.div animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.18 }}>
+        <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#C7C7CC' }} />
+      </motion.div>
+    </button>
+    <AnimatePresence initial={false}>
+      {isOpen && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+          className="overflow-hidden border-t border-gray-100"
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
   </div>
 );
 
@@ -76,8 +115,15 @@ export const ProfileScreen = ({
   const [idiomaAtivo, setIdiomaAtivo] = useState('pt-br');
   const [isPortalOpen, setIsPortalOpen] = useState(false);
   const [portalAtivo, setPortalAtivo] = useState('lector');
+  const [openSection, setOpenSection] = useState<string | null>(null);
 
-  const portalSelecionado = PORTAIS.find(p => p.id === portalAtivo) ?? PORTAIS[0];
+  // Igual à sidebar: só uma seção aberta por vez; trocar de seção fecha os subníveis
+  const toggleSection = (id: string) => {
+    setOpenSection(prev => (prev === id ? null : id));
+    setIsPerfilOpen(false);
+    setIsIdiomaOpen(false);
+    setIsPortalOpen(false);
+  };
 
   const IDIOMAS = [
     { id: 'pt-br', label: 'Português', country: 'Brasil', locale: 'Português do Brasil' },
@@ -160,140 +206,21 @@ export const ProfileScreen = ({
               </div>
             </div>
 
-            {/* Portal — troca de contexto */}
-            <div className="mb-6">
-              <p className="text-[13px] text-gray-500 font-normal px-4 mb-1 uppercase tracking-wide">Portal</p>
+            {/* Idioma */}
+            <div className="mb-3">
               <div className="bg-white rounded-2xl overflow-hidden mx-4">
                 <button
-                  onClick={() => setIsPortalOpen(v => !v)}
-                  className="w-full flex items-center gap-3 px-4 min-h-[62px] active:bg-gray-100 transition-colors"
-                >
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-[12px] font-bold ${portalSelecionado.cor}`}>
-                    {portalSelecionado.sigla}
-                  </div>
-                  <span className="flex-1 text-left min-w-0">
-                    <span className="block text-[15px] font-medium text-gray-900 leading-snug truncate">{portalSelecionado.nome}</span>
-                    <span className="block text-[12px] text-gray-400 leading-snug mt-0.5">Toque para trocar de portal</span>
-                  </span>
-                  <motion.div animate={{ rotate: isPortalOpen ? 90 : 0 }} transition={{ duration: 0.18 }}>
-                    <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#C7C7CC' }} />
-                  </motion.div>
-                </button>
-                <AnimatePresence initial={false}>
-                  {isPortalOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.22, ease: 'easeOut' }}
-                      className="overflow-hidden border-t border-gray-100"
-                    >
-                      {PORTAIS.map(p => {
-                        const active = portalAtivo === p.id;
-                        return (
-                          <button
-                            key={p.id}
-                            aria-pressed={active}
-                            onClick={() => { setPortalAtivo(p.id); setIsPortalOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 min-h-[52px] active:bg-gray-100 transition-colors border-b border-gray-100 last:border-0 ${
-                              active ? 'bg-brand-primary/[0.04]' : ''
-                            }`}
-                          >
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-[11px] font-bold ${p.cor}`}>
-                              {p.sigla}
-                            </div>
-                            <span className={`flex-1 text-left text-[15px] truncate ${active ? 'font-semibold text-brand-primary' : 'font-medium text-gray-800'}`}>
-                              {p.nome}
-                            </span>
-                            {active && <Check className="h-4 w-4 text-brand-primary flex-shrink-0" strokeWidth={3} />}
-                          </button>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
-            {/* Atalhos */}
-            <div className="mb-6">
-              <div className="bg-white rounded-2xl overflow-hidden mx-4">
-                <ProfileRow icon={MessageSquare} label="Chat" last onClick={onOpenChat} />
-              </div>
-            </div>
-
-            <ProfileSection label="Minha Área">
-              <ProfileRow icon={Play}        label="Meus Treinamentos" />
-              <ProfileRow icon={Compass}     label="Minhas Trilhas"    />
-              <ProfileRow icon={Star}        label="Minhas Habilidades"/>
-              <ProfileRow icon={Award}       label="Meus Certificados" />
-              <ProfileRow icon={Calendar}    label="Meu Calendário"    />
-              <ProfileRow icon={ShoppingBag} label="Minhas Compras" last onClick={() => { setActiveTab('Minhas Compras'); onClose(); }} />
-            </ProfileSection>
-
-            {/* Conta */}
-            <ProfileSection label="Conta">
-              {/* Selecionar perfil — accordion */}
-              <>
-                <button
-                  onClick={() => setIsPerfilOpen(v => !v)}
-                  className="w-full flex items-center gap-3 px-4 min-h-[52px] active:bg-gray-100 transition-colors text-gray-900"
-                >
-                  <Users className="h-[18px] w-[18px] flex-shrink-0 text-gray-400" />
-                  <span className="flex-1 text-left text-[15px]">Selecionar perfil</span>
-                  <motion.div animate={{ rotate: isPerfilOpen ? 90 : 0 }} transition={{ duration: 0.18 }}>
-                    <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#C7C7CC' }} />
-                  </motion.div>
-                </button>
-                <AnimatePresence initial={false}>
-                  {isPerfilOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.22, ease: 'easeOut' }}
-                      className="overflow-hidden border-t border-gray-100"
-                    >
-                      {[
-                        { id: 'aluno',         label: 'Aluno',          sub: 'Lector' },
-                        { id: 'administrador', label: 'Administrador',  sub: 'Lector' },
-                      ].map(({ id, label, sub }) => {
-                        const active = perfilAtivo === id;
-                        return (
-                          <button
-                            key={id}
-                            onClick={() => { setPerfilAtivo(id); setIsPerfilOpen(false); }}
-                            className="w-full flex items-center gap-3 px-4 min-h-[50px] active:bg-gray-100 transition-colors border-b border-gray-100 last:border-0"
-                          >
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                              active ? 'bg-brand-primary/10' : 'bg-gray-100'
-                            }`}>
-                              <User className={`h-4 w-4 ${active ? 'text-brand-primary' : 'text-gray-400'}`} />
-                            </div>
-                            <div className="flex-1 text-left">
-                              <div className={`text-[15px] font-medium ${active ? 'text-brand-primary' : 'text-gray-800'}`}>
-                                {label}
-                              </div>
-                              <div className="text-[12px] text-gray-400">{sub}</div>
-                            </div>
-                            {active && <Check className="h-4 w-4 text-brand-primary flex-shrink-0" />}
-                          </button>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <div className="h-px bg-gray-100 ml-4" />
-              </>
-              {/* Alterar idioma — accordion */}
-              <>
-                <button
-                  onClick={() => setIsIdiomaOpen(v => !v)}
+                  onClick={() => {
+                    setIsIdiomaOpen(v => !v);
+                    setOpenSection(null);
+                    setIsPerfilOpen(false);
+                    setIsPortalOpen(false);
+                  }}
                   className="w-full flex items-center gap-3 px-4 min-h-[62px] active:bg-gray-100 transition-colors text-gray-900"
                 >
                   <Globe className="h-[18px] w-[18px] flex-shrink-0 text-gray-400" />
                   <span className="flex-1 text-left min-w-0">
-                    <span className="block text-[15px] font-medium text-gray-900 leading-snug">Alterar idioma</span>
+                    <span className="block text-[15px] font-semibold text-gray-900 leading-snug">Idioma</span>
                     <span className="block text-[12px] text-gray-400 leading-snug mt-0.5 truncate">
                       {idiomaSelecionado.label} · {idiomaSelecionado.country}
                     </span>
@@ -336,26 +263,163 @@ export const ProfileScreen = ({
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <div className="h-px bg-gray-100 ml-4" />
-              </>
-              <ProfileRow icon={Download}    label="Instalar app"   last       />
-            </ProfileSection>
-
-            {/* Suporte */}
-            <ProfileSection label="Suporte">
-              <ProfileRow icon={CheckCircle} label="Validar certificado" onClick={onOpenCertificado} />
-              <ProfileRow icon={BookOpen}    label="Ver glossário"        last />
-            </ProfileSection>
+              </div>
+            </div>
 
             {/* Acessibilidade */}
-            <div className="mb-6">
-              <p className="text-[13px] text-gray-500 font-normal px-4 mb-1 uppercase tracking-wide">Acessibilidade</p>
+            <div className="mb-3">
+              <div className="bg-white rounded-2xl overflow-hidden mx-4">
+                <ProfileRow icon={Accessibility} label="Acessibilidade" strong last />
+              </div>
+            </div>
+
+            {/* Portal — troca de contexto */}
+            <div className="mb-3">
+              <div className="bg-white rounded-2xl overflow-hidden mx-4">
+                <button
+                  onClick={() => {
+                    setIsPortalOpen(v => !v);
+                    setOpenSection(null);
+                    setIsPerfilOpen(false);
+                    setIsIdiomaOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 min-h-[52px] active:bg-gray-100 transition-colors"
+                >
+                  <LayoutGrid className="h-[18px] w-[18px] flex-shrink-0 text-gray-400" />
+                  <span className="flex-1 text-left text-[15px] font-semibold text-gray-900">Portais</span>
+                  <motion.div animate={{ rotate: isPortalOpen ? 90 : 0 }} transition={{ duration: 0.18 }}>
+                    <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#C7C7CC' }} />
+                  </motion.div>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isPortalOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                      className="overflow-hidden border-t border-gray-100"
+                    >
+                      {PORTAIS.map(p => {
+                        const active = portalAtivo === p.id;
+                        return (
+                          <button
+                            key={p.id}
+                            aria-pressed={active}
+                            onClick={() => { setPortalAtivo(p.id); setIsPortalOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 min-h-[52px] active:bg-gray-100 transition-colors border-b border-gray-100 last:border-0 ${
+                              active ? 'bg-brand-primary/[0.04]' : ''
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-[11px] font-bold ${p.cor}`}>
+                              {p.sigla}
+                            </div>
+                            <span className={`flex-1 text-left text-[15px] truncate ${active ? 'font-semibold text-brand-primary' : 'font-medium text-gray-800'}`}>
+                              {p.nome}
+                            </span>
+                            {active && <Check className="h-4 w-4 text-brand-primary flex-shrink-0" strokeWidth={3} />}
+                          </button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Atalhos */}
+            <div className="mb-3">
+              <div className="bg-white rounded-2xl overflow-hidden mx-4">
+                <ProfileRow icon={MessageSquare} label="Chat" strong last onClick={onOpenChat} />
+              </div>
+            </div>
+
+            {/* Minha Área — grupo recolhível */}
+            <ProfileGroup
+              icon={LayoutDashboard}
+              label="Minha Área"
+              isOpen={openSection === 'minha-area'}
+              onToggle={() => toggleSection('minha-area')}
+            >
+              <ProfileRow icon={Play}        label="Meus Treinamentos" />
+              <ProfileRow icon={Compass}     label="Minhas Trilhas"    />
+              <ProfileRow icon={Star}        label="Minhas Habilidades"/>
+              <ProfileRow icon={Award}       label="Meus Certificados" />
+              <ProfileRow icon={Calendar}    label="Meu Calendário"    />
+              <ProfileRow icon={ShoppingBag} label="Minhas Compras" last onClick={() => { setActiveTab('Minhas Compras'); onClose(); }} />
+            </ProfileGroup>
+
+            {/* Conta */}
+            <div className="bg-white rounded-2xl overflow-hidden mx-4 mb-3">
+              <>
+                <button
+                  onClick={() => {
+                    setIsPerfilOpen(v => !v);
+                    setOpenSection(null);
+                    setIsIdiomaOpen(false);
+                    setIsPortalOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 min-h-[52px] active:bg-gray-100 transition-colors text-gray-900"
+                >
+                  <Users className="h-[18px] w-[18px] flex-shrink-0 text-gray-400" />
+                  <span className="flex-1 text-left text-[15px] font-semibold">Selecionar perfil</span>
+                  <motion.div animate={{ rotate: isPerfilOpen ? 90 : 0 }} transition={{ duration: 0.18 }}>
+                    <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#C7C7CC' }} />
+                  </motion.div>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isPerfilOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                      className="overflow-hidden border-t border-gray-100"
+                    >
+                      {[
+                        { id: 'aluno',         label: 'Aluno',          sub: 'Lector' },
+                        { id: 'administrador', label: 'Administrador',  sub: 'Lector' },
+                      ].map(({ id, label, sub }) => {
+                        const active = perfilAtivo === id;
+                        return (
+                          <button
+                            key={id}
+                            onClick={() => { setPerfilAtivo(id); setIsPerfilOpen(false); }}
+                            className="w-full flex items-center gap-3 px-4 min-h-[50px] active:bg-gray-100 transition-colors border-b border-gray-100 last:border-0"
+                          >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              active ? 'bg-brand-primary/10' : 'bg-gray-100'
+                            }`}>
+                              <User className={`h-4 w-4 ${active ? 'text-brand-primary' : 'text-gray-400'}`} />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <div className={`text-[15px] font-medium ${active ? 'text-brand-primary' : 'text-gray-800'}`}>
+                                {label}
+                              </div>
+                              <div className="text-[12px] text-gray-400">{sub}</div>
+                            </div>
+                            {active && <Check className="h-4 w-4 text-brand-primary flex-shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div className="h-px bg-gray-100 ml-[46px]" />
+              </>
+              <ProfileRow icon={Download}    label="Instalar app"   strong last />
+            </div>
+
+            {/* Suporte */}
+            <div className="bg-white rounded-2xl overflow-hidden mx-4 mb-3">
+              <ProfileRow icon={CheckCircle} label="Validar certificado" strong onClick={onOpenCertificado} />
+              <ProfileRow icon={BookOpen}    label="Ver glossário"        strong last />
             </div>
 
             {/* Sair */}
-            <ProfileSection label="">
-              <ProfileRow icon={LogOut} label="Sair" danger last />
-            </ProfileSection>
+            <div className="bg-white rounded-2xl overflow-hidden mx-4 mt-3 mb-6">
+              <ProfileRow icon={LogOut} label="Sair" danger strong last />
+            </div>
 
             <div className="h-8" />
           </div>

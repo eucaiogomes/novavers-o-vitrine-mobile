@@ -1060,6 +1060,15 @@ const Topbar = ({
             <Menu className="h-5 w-5" />
           </button>
 
+          {/* Install icon — mobile/tablet */}
+          <button
+            type="button"
+            aria-label="Instalar app"
+            className="p-2 text-gray-500 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors duration-150 lg:hidden flex-shrink-0"
+          >
+            <Download className="h-5 w-5" />
+          </button>
+
           {/* Logo mobile — absolutamente centralizado */}
           <div
             className="lg:hidden absolute left-1/2 -translate-x-1/2 cursor-pointer flex-shrink-0"
