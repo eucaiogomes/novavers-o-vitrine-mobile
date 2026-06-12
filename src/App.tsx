@@ -864,6 +864,493 @@ const MegaMenu = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => 
   );
 };
 
+// ============================================================
+// CERTIFICADO SCREEN — slides from right, same design as ProfileScreen
+// ============================================================
+const CertificadoScreen = ({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
+  const [codigo, setCodigo] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'valid' | 'invalid'>('idle');
+  // Reset when closed
+  useEffect(() => {
+    if (!isOpen) { setCodigo(''); setStatus('idle'); }
+  }, [isOpen]);
+
+  const handleValidar = () => {
+    if (!codigo.trim()) return;
+    setStatus('loading');
+    setTimeout(() => {
+      // Mock: any 8+ char code is "valid"
+      setStatus(codigo.trim().length >= 8 ? 'valid' : 'invalid');
+    }, 1400);
+  };
+
+  const MOCK_RESULT = {
+    nome: 'Caio Gomes',
+    treinamento: 'Fundamentos de Inteligência Artificial para Negócios',
+    turma: 'Turma 01 — 2026',
+    conclusao: '21/01/2026',
+    aproveitamento: '100%',
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          key="certificado-screen"
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+          className="fixed top-14 inset-x-0 bottom-0 z-[95] lg:hidden flex flex-col overflow-hidden"
+          style={{ backgroundColor: '#F2F2F7' }}
+        >
+
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto pt-6">
+
+            {/* Seção: campo de código */}
+            <div className="mb-6">
+              <p className="text-[13px] text-gray-500 font-normal px-4 mb-1 uppercase tracking-wide">Código do certificado</p>
+              <div className="bg-white rounded-2xl overflow-hidden mx-4">
+                {/* Input row */}
+                <div className="flex items-center gap-3 px-4 min-h-[52px]">
+                  <input
+                    type="text"
+                    value={codigo}
+                    onChange={e => { setCodigo(e.target.value.toUpperCase()); setStatus('idle'); }}
+                    placeholder="Ex: A1B2-C3D4-E5F6..."
+                    maxLength={32}
+                    autoCapitalize="characters"
+                    className="flex-1 bg-transparent text-[15px] text-gray-800 placeholder:text-gray-400 outline-none py-3"
+                  />
+                  {codigo ? (
+                    <button
+                      onPointerDown={e => e.preventDefault()}
+                      onClick={() => { setCodigo(''); setStatus('idle'); }}
+                      className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0"
+                    >
+                      <X className="h-3 w-3 text-white" />
+                    </button>
+                  ) : null}
+                </div>
+
+                {/* Divisor */}
+                <div className="h-px bg-gray-100 ml-4" />
+
+                {/* Ação: Verificar — row estilo iOS */}
+                <button
+                  onClick={handleValidar}
+                  disabled={!codigo.trim() || status === 'loading'}
+                  className="w-full flex items-center gap-3 px-4 min-h-[52px] active:bg-gray-50 transition-colors disabled:opacity-40"
+                >
+                  {status === 'loading' ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 0.75, repeat: Infinity, ease: 'linear' }}
+                        className="w-[18px] h-[18px] border-2 border-gray-300 border-t-brand-primary rounded-full flex-shrink-0"
+                      />
+                      <span className="flex-1 text-left text-[15px] text-gray-400">Verificando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="h-[18px] w-[18px] flex-shrink-0 text-gray-400" />
+                      <span className="flex-1 text-left text-[15px] font-semibold text-brand-primary">Verificar autenticidade</span>
+                      <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#C7C7CC' }} />
+                    </>
+                  )}
+                </button>
+              </div>
+              <p className="text-[12px] text-gray-400 px-4 mt-1.5">{codigo.length}/32 caracteres</p>
+            </div>
+
+            {/* Resultado */}
+            <AnimatePresence>
+              {status === 'valid' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+                  className="mb-6"
+                >
+                  <p className="text-[13px] text-gray-500 font-normal px-4 mb-1 uppercase tracking-wide">Resultado</p>
+                  <div className="bg-white rounded-2xl overflow-hidden mx-4">
+                    {/* Status row */}
+                    <div className="flex items-center gap-3 px-4 min-h-[52px] border-b border-gray-100">
+                      <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                        <Check className="h-4 w-4 text-emerald-600" strokeWidth={2.5} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[15px] font-semibold text-emerald-600">Certificado válido</p>
+                        <p className="text-[12px] text-gray-400">Autenticidade confirmada pela Lector</p>
+                      </div>
+                    </div>
+                    {/* Detalhe rows */}
+                    {[
+                      { label: 'Usuário',        value: MOCK_RESULT.nome           },
+                      { label: 'Treinamento',    value: MOCK_RESULT.treinamento    },
+                      { label: 'Turma',          value: MOCK_RESULT.turma          },
+                      { label: 'Conclusão',      value: MOCK_RESULT.conclusao      },
+                      { label: 'Aproveitamento', value: MOCK_RESULT.aproveitamento },
+                    ].map(({ label, value }, i, arr) => (
+                      <div key={label} className={`flex items-center gap-3 px-4 min-h-[52px] ${i < arr.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                        <span className="text-[15px] text-gray-800 flex-1">{label}</span>
+                        <span className="text-[15px] text-gray-400 text-right max-w-[55%]">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {status === 'invalid' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+                  className="mb-6"
+                >
+                  <p className="text-[13px] text-gray-500 font-normal px-4 mb-1 uppercase tracking-wide">Resultado</p>
+                  <div className="bg-white rounded-2xl overflow-hidden mx-4">
+                    <div className="flex items-center gap-3 px-4 min-h-[52px]">
+                      <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <AlertCircle className="h-4 w-4 text-red-500" strokeWidth={2.5} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[15px] font-semibold text-red-500">Código não encontrado</p>
+                        <p className="text-[12px] text-gray-400">Verifique o código e tente novamente</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="h-10" />
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+// ============================================================
+// PROFILE SCREEN — iOS-style full-screen, slides from right
+// Design tokens extracted from reference:
+//   bg: #F2F2F7  |  card: #FFFFFF  |  label: #6B7280 12px
+//   row-height: 52px  |  divider: #F3F4F6  |  arrow: #C7C7CC
+//   header: centered title, back arrow left, 44px height
+// ============================================================
+const ProfileRow = ({
+  icon: Icon,
+  label,
+  value,
+  onClick,
+  danger,
+  last,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value?: string;
+  onClick?: () => void;
+  danger?: boolean;
+  last?: boolean;
+}) => (
+  <>
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-4 min-h-[52px] active:bg-gray-100 transition-colors ${
+        danger ? 'text-red-500' : 'text-gray-900'
+      }`}
+    >
+      <Icon className={`h-[18px] w-[18px] flex-shrink-0 ${danger ? 'text-red-400' : 'text-gray-400'}`} />
+      <span className="flex-1 text-left text-[15px]">{label}</span>
+      {value && <span className="text-[15px] text-gray-400 mr-1">{value}</span>}
+      {!danger && <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#C7C7CC' }} />}
+    </button>
+    {!last && <div className="h-px bg-gray-100 ml-4" />}
+  </>
+);
+
+const ProfileSection = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="mb-6">
+    <p className="text-[13px] text-gray-500 font-normal px-4 mb-1 uppercase tracking-wide">{label}</p>
+    <div className="bg-white rounded-2xl overflow-hidden mx-4">{children}</div>
+  </div>
+);
+
+const ProfileScreen = ({
+  isOpen,
+  onClose,
+  setActiveTab,
+  onOpenCertificado,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  setActiveTab: (tab: string) => void;
+  onOpenCertificado: () => void;
+}) => {
+  const swipeStartX = useRef(0);
+  const [isPerfilOpen, setIsPerfilOpen] = useState(false);
+  const [perfilAtivo, setPerfilAtivo] = useState('aluno');
+  const [isIdiomaOpen, setIsIdiomaOpen] = useState(false);
+  const [idiomaAtivo, setIdiomaAtivo] = useState('pt-br');
+
+  const IDIOMAS = [
+    { id: 'pt-br', label: 'Português', sub: 'BR', flag: '🇧🇷', value: 'PT' },
+    { id: 'en',    label: 'English',   sub: 'US', flag: '🇺🇸', value: 'EN' },
+    { id: 'es',    label: 'Español',   sub: 'ES', flag: '🇪🇸', value: 'ES' },
+  ];
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  useEffect(() => {
+    const fn = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', fn);
+    return () => document.removeEventListener('keydown', fn);
+  }, [onClose]);
+
+  const handleTouchStart = (e: React.TouchEvent) => { swipeStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd   = (e: React.TouchEvent) => {
+    if (e.changedTouches[0].clientX - swipeStartX.current > 60) onClose();
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          key="profile-screen"
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className="fixed inset-0 z-[90] lg:hidden flex flex-col overflow-hidden"
+          style={{ backgroundColor: '#F2F2F7' }}
+        >
+          {/* iOS-style header — centered title, back left */}
+          <div className="flex-shrink-0 relative flex items-center justify-center h-11 bg-white border-b border-gray-200">
+            <button
+              onClick={onClose}
+              className="absolute left-2 flex items-center gap-0.5 px-2 h-full text-brand-primary"
+            >
+              <ChevronLeft className="h-5 w-5" />
+              <span className="text-[17px]">Voltar</span>
+            </button>
+            <span className="text-[17px] font-semibold text-gray-900">Perfil</span>
+          </div>
+
+          {/* Scrollable body */}
+          <div className="flex-1 overflow-y-auto pt-6">
+
+            {/* User identity — flat card, no shadow */}
+            <div className="bg-white rounded-2xl mx-4 mb-6 px-4 py-4 flex items-center gap-3">
+              <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
+                <img src="https://picsum.photos/seed/user/100/100" alt="Avatar" className="w-full h-full object-cover" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[17px] font-semibold text-gray-900 leading-snug">Caio Gomes</div>
+                <div className="text-[13px] text-gray-500 truncate">suporte2@lectortec.com.br</div>
+                <div className="text-[13px] font-semibold text-brand-primary mt-0.5">Aluno</div>
+              </div>
+              <div className="flex flex-col items-center justify-center gap-0.5 flex-shrink-0">
+                <Award className="h-5 w-5 text-amber-400" />
+                <span className="text-[12px] font-semibold text-gray-700 whitespace-nowrap">1.324 pts</span>
+              </div>
+            </div>
+
+            {/* Minha Área */}
+            <ProfileSection label="Minha Área">
+              <ProfileRow icon={Play}        label="Meus Treinamentos" />
+              <ProfileRow icon={Compass}     label="Minhas Trilhas"    />
+              <ProfileRow icon={Star}        label="Minhas Habilidades"/>
+              <ProfileRow icon={Award}       label="Meus Certificados" />
+              <ProfileRow icon={Calendar}    label="Meu Calendário"    />
+              <ProfileRow icon={ShoppingBag} label="Minhas Compras" last onClick={() => { setActiveTab('Minhas Compras'); onClose(); }} />
+            </ProfileSection>
+
+            {/* Conta */}
+            <ProfileSection label="Conta">
+              {/* Selecionar perfil — accordion */}
+              <>
+                <button
+                  onClick={() => setIsPerfilOpen(v => !v)}
+                  className="w-full flex items-center gap-3 px-4 min-h-[52px] active:bg-gray-100 transition-colors text-gray-900"
+                >
+                  <Users className="h-[18px] w-[18px] flex-shrink-0 text-gray-400" />
+                  <span className="flex-1 text-left text-[15px]">Selecionar perfil</span>
+                  <motion.div animate={{ rotate: isPerfilOpen ? 90 : 0 }} transition={{ duration: 0.18 }}>
+                    <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#C7C7CC' }} />
+                  </motion.div>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isPerfilOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                      className="overflow-hidden border-t border-gray-100"
+                    >
+                      {[
+                        { id: 'aluno',         label: 'Aluno',          sub: 'Lector' },
+                        { id: 'administrador', label: 'Administrador',  sub: 'Lector' },
+                      ].map(({ id, label, sub }) => {
+                        const active = perfilAtivo === id;
+                        return (
+                          <button
+                            key={id}
+                            onClick={() => { setPerfilAtivo(id); setIsPerfilOpen(false); }}
+                            className="w-full flex items-center gap-3 px-4 min-h-[50px] active:bg-gray-100 transition-colors border-b border-gray-100 last:border-0"
+                          >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              active ? 'bg-brand-primary/10' : 'bg-gray-100'
+                            }`}>
+                              <User className={`h-4 w-4 ${active ? 'text-brand-primary' : 'text-gray-400'}`} />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <div className={`text-[15px] font-medium ${active ? 'text-brand-primary' : 'text-gray-800'}`}>
+                                {label}
+                              </div>
+                              <div className="text-[12px] text-gray-400">{sub}</div>
+                            </div>
+                            {active && <Check className="h-4 w-4 text-brand-primary flex-shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div className="h-px bg-gray-100 ml-4" />
+              </>
+              {/* Alterar idioma — accordion */}
+              <>
+                <button
+                  onClick={() => setIsIdiomaOpen(v => !v)}
+                  className="w-full flex items-center gap-3 px-4 min-h-[52px] active:bg-gray-100 transition-colors text-gray-900"
+                >
+                  <Globe className="h-[18px] w-[18px] flex-shrink-0 text-gray-400" />
+                  <span className="flex-1 text-left text-[15px]">Alterar idioma</span>
+                  <span className="text-[15px] text-gray-400 mr-1">
+                    {IDIOMAS.find(i => i.id === idiomaAtivo)?.value}
+                  </span>
+                  <motion.div animate={{ rotate: isIdiomaOpen ? 90 : 0 }} transition={{ duration: 0.18 }}>
+                    <ChevronRight className="h-4 w-4 flex-shrink-0" style={{ color: '#C7C7CC' }} />
+                  </motion.div>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isIdiomaOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                      className="overflow-hidden border-t border-gray-100"
+                    >
+                      {IDIOMAS.map(({ id, label, sub, flag }) => {
+                        const active = idiomaAtivo === id;
+                        return (
+                          <button
+                            key={id}
+                            onClick={() => { setIdiomaAtivo(id); setIsIdiomaOpen(false); }}
+                            className="w-full flex items-center gap-3 px-4 min-h-[50px] active:bg-gray-100 transition-colors border-b border-gray-100 last:border-0"
+                          >
+                            <span className="text-[22px] leading-none flex-shrink-0">{flag}</span>
+                            <div className="flex-1 text-left">
+                              <span className={`text-[15px] font-medium ${active ? 'text-brand-primary' : 'text-gray-800'}`}>
+                                {label}
+                              </span>
+                              <span className="text-[13px] text-gray-400 ml-1.5">{sub}</span>
+                            </div>
+                            {active && <Check className="h-4 w-4 text-brand-primary flex-shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div className="h-px bg-gray-100 ml-4" />
+              </>
+              <ProfileRow icon={Download}    label="Instalar app"   last       />
+            </ProfileSection>
+
+            {/* Suporte */}
+            <ProfileSection label="Suporte">
+              <ProfileRow icon={CheckCircle} label="Validar certificado" onClick={onOpenCertificado} />
+              <ProfileRow icon={BookOpen}    label="Ver glossário"        last />
+            </ProfileSection>
+
+            {/* Sair */}
+            <ProfileSection label="">
+              <ProfileRow icon={LogOut} label="Sair" danger last />
+            </ProfileSection>
+
+            <div className="h-8" />
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const UserDropdown = ({
+  isMinhaAreaOpen,
+  setIsMinhaAreaOpen,
+  setActiveTab,
+  setIsUserMenuOpen,
+}: {
+  isMinhaAreaOpen: boolean;
+  setIsMinhaAreaOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setActiveTab: (tab: string) => void;
+  setIsUserMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+    className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden"
+  >
+    <div className="px-4 py-3 border-b border-gray-100 mb-2 bg-gray-50/50">
+      <div className="text-sm font-bold text-gray-900">Caio Gomes</div>
+      <div className="text-xs text-gray-500 truncate">suporte2@lectortec.com.br</div>
+    </div>
+    <button onClick={() => setIsMinhaAreaOpen(v => !v)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center justify-between transition-colors">
+      <div className="flex items-center gap-3"><LayoutDashboard className="h-4 w-4" /> Minha Area</div>
+      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMinhaAreaOpen ? 'rotate-180' : ''}`} />
+    </button>
+    <AnimatePresence>
+      {isMinhaAreaOpen && (
+        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-gray-50/30">
+          <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Play className="h-3.5 w-3.5" /> Meus Treinamentos</button>
+          <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Compass className="h-3.5 w-3.5" /> Minhas Trilhas</button>
+          <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Star className="h-3.5 w-3.5" /> Minhas Habilidades</button>
+          <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Award className="h-3.5 w-3.5" /> Meus Certificados</button>
+          <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Calendar className="h-3.5 w-3.5" /> Meu Calendário</button>
+          <button onClick={() => { setActiveTab('Minhas Compras'); setIsUserMenuOpen(false); }} className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><ShoppingBag className="h-3.5 w-3.5" /> Minhas Compras</button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><Users className="h-4 w-4" /> Selecionar perfil</button>
+    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><Globe className="h-4 w-4" /> Alterar idioma</button>
+    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><Download className="h-4 w-4" /> Instalar</button>
+    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><CheckCircle className="h-4 w-4" /> Validar certificado</button>
+    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><BookOpen className="h-4 w-4" /> Ver glossário</button>
+    <div className="h-px bg-gray-100 my-2" />
+    <button className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors font-medium"><LogOut className="h-4 w-4" /> Sair</button>
+  </motion.div>
+);
+
 const Topbar = ({
   onMenuToggle,
   setActiveTab,
@@ -874,6 +1361,8 @@ const Topbar = ({
   activeTab: string;
 }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isProfileScreenOpen, setIsProfileScreenOpen] = useState(false);
+  const [isCertificadoOpen, setIsCertificadoOpen] = useState(false);
   const [isMinhaAreaOpen, setIsMinhaAreaOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<ContentItem[]>([]);
@@ -932,42 +1421,6 @@ const Topbar = ({
     return () => document.removeEventListener('mousedown', handleClick);
   }, [isMobileSearchOpen]);
 
-  const UserDropdown = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-      className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden"
-    >
-      <div className="px-4 py-3 border-b border-gray-100 mb-2 bg-gray-50/50">
-        <div className="text-sm font-bold text-gray-900">Caio Gomes</div>
-        <div className="text-xs text-gray-500 truncate">suporte2@lectortec.com.br</div>
-      </div>
-      <button onClick={() => setIsMinhaAreaOpen(v => !v)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center justify-between transition-colors">
-        <div className="flex items-center gap-3"><LayoutDashboard className="h-4 w-4" /> Minha Area</div>
-        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMinhaAreaOpen ? 'rotate-180' : ''}`} />
-      </button>
-      <AnimatePresence>
-        {isMinhaAreaOpen && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden bg-gray-50/30">
-            <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Play className="h-3.5 w-3.5" /> Meus Treinamentos</button>
-            <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Compass className="h-3.5 w-3.5" /> Minhas Trilhas</button>
-            <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Star className="h-3.5 w-3.5" /> Minhas Habilidades</button>
-            <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Award className="h-3.5 w-3.5" /> Meus Certificados</button>
-            <button className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><Calendar className="h-3.5 w-3.5" /> Meu Calendário</button>
-            <button onClick={() => { setActiveTab('Minhas Compras'); setIsUserMenuOpen(false); }} className="w-full text-left pl-11 pr-4 py-2.5 text-sm text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary flex items-center gap-3 transition-colors"><ShoppingBag className="h-3.5 w-3.5" /> Minhas Compras</button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><Users className="h-4 w-4" /> Selecionar perfil</button>
-      <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><Globe className="h-4 w-4" /> Alterar idioma</button>
-      <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><Download className="h-4 w-4" /> Instalar</button>
-      <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><CheckCircle className="h-4 w-4" /> Validar termos de Aceite</button>
-      <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-primary/5 hover:text-brand-primary flex items-center gap-3 transition-colors"><BookOpen className="h-4 w-4" /> Ver glossário</button>
-      <div className="h-px bg-gray-100 my-2" />
-      <button className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors font-medium"><LogOut className="h-4 w-4" /> Sair</button>
-    </motion.div>
-  );
 
   return (
     <>
@@ -1035,7 +1488,7 @@ const Topbar = ({
 
           {/* Hamburger — mobile/tablet */}
           <button
-            onClick={onMenuToggle}
+            onClick={() => { setIsCertificadoOpen(false); onMenuToggle(); }}
             className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors lg:hidden flex-shrink-0"
           >
             <Menu className="h-5 w-5" />
@@ -1044,7 +1497,7 @@ const Topbar = ({
           {/* Logo mobile — absolutamente centralizado */}
           <div
             className="lg:hidden absolute left-1/2 -translate-x-1/2 cursor-pointer flex-shrink-0"
-            onClick={() => setActiveTab('Explorar')}
+            onClick={() => { setIsCertificadoOpen(false); setActiveTab('Explorar'); }}
           >
             <img src={logoLector} alt="Lector" className="h-7 w-auto" />
           </div>
@@ -1148,10 +1601,17 @@ const Topbar = ({
               <Search className="h-5 w-5" />
             </button>
 
-            {/* User avatar */}
+            {/* User avatar — mobile opens bottom sheet, desktop opens dropdown */}
             <div ref={userMenuRef} className="relative">
               <button
-                onClick={() => setIsUserMenuOpen(v => !v)}
+                onClick={() => {
+                  if (window.innerWidth < 1024) {
+                    setIsCertificadoOpen(false);
+                    setIsProfileScreenOpen(true);
+                  } else {
+                    setIsUserMenuOpen(v => !v);
+                  }
+                }}
                 className="flex items-center gap-2 pl-1 pr-1 lg:pr-2 py-1 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <div className="w-8 h-8 lg:w-7 lg:h-7 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary overflow-hidden">
@@ -1159,21 +1619,69 @@ const Topbar = ({
                 </div>
                 <span className="text-sm font-medium text-gray-700 hidden lg:block">Caio Gomes</span>
               </button>
+              {/* Desktop dropdown */}
               <AnimatePresence>
-                {isUserMenuOpen && <UserDropdown />}
+                {isUserMenuOpen && (
+                  <UserDropdown
+                    isMinhaAreaOpen={isMinhaAreaOpen}
+                    setIsMinhaAreaOpen={setIsMinhaAreaOpen}
+                    setActiveTab={setActiveTab}
+                    setIsUserMenuOpen={setIsUserMenuOpen}
+                  />
+                )}
               </AnimatePresence>
             </div>
+
           </div>
 
         </div>
       </header>
+      <ProfileScreen
+        isOpen={isProfileScreenOpen}
+        onClose={() => setIsProfileScreenOpen(false)}
+        setActiveTab={setActiveTab}
+        onOpenCertificado={() => { setIsProfileScreenOpen(false); setIsCertificadoOpen(true); }}
+      />
+      <CertificadoScreen isOpen={isCertificadoOpen} onClose={() => setIsCertificadoOpen(false)} />
     </>
   );
 };
 
 // ============================================================
-// SIDEBAR
+// SIDEBAR — accordion in-place, no drill screens
 // ============================================================
+const VitrineBtn = ({
+  vitrine,
+  indent = false,
+  activeVitrineId,
+  setActiveVitrineId,
+  onClose,
+}: {
+  vitrine: Vitrine;
+  indent?: boolean;
+  activeVitrineId: string;
+  setActiveVitrineId: (id: string) => void;
+  onClose: () => void;
+}) => {
+  const isActive = vitrine.id === activeVitrineId;
+  return (
+    <button
+      onClick={() => { setActiveVitrineId(vitrine.id); onClose(); }}
+      className={`relative w-full flex items-center gap-2.5 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
+        indent ? 'pl-8 pr-3' : 'pl-3 pr-3'
+      } ${isActive
+        ? 'bg-brand-primary/10 text-brand-primary'
+        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
+      }`}
+    >
+      {isActive && <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-brand-primary" />}
+      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive ? 'bg-brand-primary' : 'bg-gray-300'}`} />
+      <span className="flex-1 text-left truncate">{vitrine.nome}</span>
+      {isActive && <Check className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />}
+    </button>
+  );
+};
+
 const Sidebar = ({
   activeTab,
   setActiveTab,
@@ -1189,11 +1697,16 @@ const Sidebar = ({
   activeVitrineId: string;
   setActiveVitrineId: (id: string) => void;
 }) => {
-  // Drill-down state
-  const [drillCategory, setDrillCategory] = useState<string | null>(null);
-  const [drillSub, setDrillSub] = useState<string | null>(null);
-  const drillDirection = useRef<'in' | 'out'>('in');
-  const [vitrineBusca, setVitrineBusca] = useState('');
+  // Which category accordion is open
+  const [openCategory, setOpenCategory] = useState<string | null>(() => {
+    for (const [key, data] of Object.entries(CATEGORY_DATA)) {
+      if (key === 'all') continue;
+      if ((data as any).vitrines?.includes('v1')) return key;
+    }
+    return null;
+  });
+  // Which sub accordion is open (per category)
+  const [openSub, setOpenSub] = useState<string | null>(null);
 
   // Swipe-to-close
   const swipeStartX = useRef(0);
@@ -1210,59 +1723,29 @@ const Sidebar = ({
     return () => { window.removeEventListener('resize', handleResize); document.removeEventListener('keydown', handleKeyDown); };
   }, [onClose]);
 
-  const goInto = (category: string, sub?: string) => {
-    drillDirection.current = 'in';
-    setDrillCategory(category);
-    if (sub) setDrillSub(sub);
-  };
-  const goBack = () => {
-    drillDirection.current = 'out';
-    if (drillSub) { setDrillSub(null); }
-    else { setDrillCategory(null); }
-  };
+  // Auto-open the category that contains the active vitrine
+  useEffect(() => {
+    for (const [key, data] of Object.entries(CATEGORY_DATA)) {
+      if (key === 'all') continue;
+      if ((data as any).vitrines?.includes(activeVitrineId)) {
+        setOpenCategory(key);
+        const sub = (data as any).subs?.find((s: any) => s.vitriIds?.includes(activeVitrineId));
+        if (sub) setOpenSub(sub.id);
+        break;
+      }
+    }
+  }, [activeVitrineId]);
 
-  const NAV_ITEMS = [
-    { id: 'Explorar', label: 'Explorar', icon: BookOpen },
-    { id: 'Social', label: 'Social', icon: Users },
-    { id: 'Minha Área', label: 'Minha Área', icon: LayoutDashboard },
-  ];
-  const handleNavClick = (id: string) => { setActiveTab(id); onClose(); };
-
-  const vitrineFiltradas = vitrineBusca.trim().length > 0
-    ? VITRINES.filter(v => v.nome.toLowerCase().includes(vitrineBusca.toLowerCase()) || v.categoria.toLowerCase().includes(vitrineBusca.toLowerCase()))
-    : [];
-
-  // Shared vitrine button
-  const VitrineBtn = ({ vitrine }: { vitrine: Vitrine }) => {
-    const isActive = vitrine.id === activeVitrineId;
-    return (
-      <button
-        onClick={() => { setActiveVitrineId(vitrine.id); onClose(); }}
-        className={`relative w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all mb-0.5 ${
-          isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
-        }`}
-      >
-        {isActive && <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-brand-primary" />}
-        <span className="flex-1 text-left truncate">{vitrine.nome}</span>
-        {isActive && <Check className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />}
-      </button>
-    );
+  const toggleCategory = (key: string) => {
+    setOpenCategory(prev => (prev === key ? null : key));
+    setOpenSub(null);
   };
 
-  // Determine current level key for AnimatePresence
-  const levelKey = drillSub ?? drillCategory ?? 'root';
-
-  // Data for current drill level
-  const activeCatData = drillCategory ? (CATEGORY_DATA[drillCategory] as any) : null;
-  const activeCatVitrines = drillCategory ? VITRINES.filter(v => activeCatData?.vitrines?.includes(v.id)) : [];
-  const activeSubData = drillSub ? activeCatData?.subs?.find((s: any) => s.id === drillSub) : null;
-  const activeSubVitrines = drillSub ? VITRINES.filter(v => activeSubData?.vitriIds?.includes(v.id)) : [];
-
-  const slideVariants = {
-    enter: (dir: 'in' | 'out') => ({ x: dir === 'in' ? 40 : -40, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (dir: 'in' | 'out') => ({ x: dir === 'in' ? -40 : 40, opacity: 0 }),
+  const toggleSub = (subId: string) => {
+    setOpenSub(prev => (prev === subId ? null : subId));
   };
+
+  const categories = Object.entries(CATEGORY_DATA).filter(([key]) => key !== 'all');
 
   return (
     <>
@@ -1288,147 +1771,114 @@ const Sidebar = ({
         onTouchEnd={handleTouchEnd}
         className="fixed left-0 top-0 h-full w-72 bg-white border-r border-gray-100 z-[60] flex flex-col overflow-hidden"
       >
-        {/* Header — dinâmico por nível */}
+        {/* Header */}
         <div className="flex items-center justify-between px-4 h-14 border-b border-gray-100 flex-shrink-0">
-          <AnimatePresence mode="wait">
-            {drillCategory ? (
-              <motion.button
-                key="back-btn"
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                transition={{ duration: 0.18 }}
-                onClick={goBack}
-                className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 hover:text-brand-primary transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                {drillSub ? activeSubData?.label : activeCatData?.label}
-              </motion.button>
-            ) : (
-              <motion.img
-                key="logo"
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                transition={{ duration: 0.18 }}
-                src={logoLector}
-                alt="Lector"
-                className="h-7 w-auto cursor-pointer"
-                onClick={() => { setActiveTab('Explorar'); onClose(); }}
-              />
-            )}
-          </AnimatePresence>
-
+          <img
+            src={logoLector}
+            alt="Lector"
+            className="h-7 w-auto cursor-pointer"
+            onClick={() => { setActiveTab('Explorar'); onClose(); }}
+          />
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors flex-shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Body com drill-down */}
-        <div className="flex-1 overflow-y-auto">
-          <AnimatePresence mode="wait" custom={drillDirection.current}>
-            <motion.div
-              key={levelKey}
-              custom={drillDirection.current}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-              className="py-3 px-3"
-            >
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto py-3 px-3">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">Vitrines</p>
 
-              {/* ── Nível raiz ── */}
-              {!drillCategory && (
-                <>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-3">Vitrines</p>
+          {categories.map(([key, data]: [string, any]) => {
+            const catVitrines = VITRINES.filter(v => data.vitrines?.includes(v.id));
+            const subs: any[] = data.subs ?? [];
+            const subbedIds = subs.flatMap((s: any) => s.vitriIds as string[]);
+            const directVitrines = catVitrines.filter(v => !subbedIds.includes(v.id));
+            const hasActive = catVitrines.some(v => v.id === activeVitrineId);
+            const isCatOpen = openCategory === key;
 
-                  {/* Search */}
-                  <div className="relative mb-3">
-                    <input type="text" placeholder="Buscar vitrine..." value={vitrineBusca}
-                      onChange={e => setVitrineBusca(e.target.value)}
-                      className="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary/40 transition placeholder:text-gray-400"
-                    />
-                    <Search className="absolute left-2.5 top-[9px] w-3.5 h-3.5 text-gray-400" />
-                    {vitrineBusca && (
-                      <button onClick={() => setVitrineBusca('')} className="absolute right-2 top-[7px] p-0.5 text-gray-400 hover:text-gray-600 rounded">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
+            return (
+              <div key={key}>
+                {/* Category row */}
+                <button
+                  onClick={() => toggleCategory(key)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all mb-0.5 ${
+                    hasActive && !isCatOpen
+                      ? 'text-brand-primary bg-brand-primary/5'
+                      : isCatOpen
+                      ? 'text-gray-900 bg-gray-50'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <span className="flex-1 text-left">{data.label}</span>
+                  <span className="text-[11px] text-gray-400 font-normal tabular-nums">{catVitrines.length}</span>
+                  <motion.div animate={{ rotate: isCatOpen ? 90 : 0 }} transition={{ duration: 0.18 }}>
+                    <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  </motion.div>
+                </button>
 
-                  {/* Resultado de busca */}
-                  {vitrineBusca.trim().length > 0 ? (
-                    vitrineFiltradas.length === 0
-                      ? <p className="text-xs text-gray-400 text-center py-4">Nenhuma encontrada</p>
-                      : vitrineFiltradas.map(v => <React.Fragment key={v.id}><VitrineBtn vitrine={v} /></React.Fragment>)
-                  ) : (
-                    /* Lista de categorias */
-                    Object.entries(CATEGORY_DATA)
-                      .filter(([key]) => key !== 'all')
-                      .map(([key, data]: [string, any]) => {
-                        const catVitrines = VITRINES.filter(v => data.vitrines?.includes(v.id));
-                        const hasActive = catVitrines.some(v => v.id === activeVitrineId);
-                        return (
-                          <button key={key} onClick={() => goInto(key)}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all mb-0.5 ${
-                              hasActive ? 'text-brand-primary bg-brand-primary/5' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                            }`}
-                          >
-                            <span className="flex-1 text-left">{data.label}</span>
-                            <span className="text-[10px] text-gray-400 font-normal mr-1">{catVitrines.length}</span>
-                            <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                          </button>
-                        );
-                      })
+                {/* Expanded content */}
+                <AnimatePresence initial={false}>
+                  {isCatOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pl-2 pb-1">
+                        {/* Sub-accordions */}
+                        {subs.map((sub: any) => {
+                          const subVitrines = catVitrines.filter(v => sub.vitriIds.includes(v.id));
+                          const subHasActive = subVitrines.some(v => v.id === activeVitrineId);
+                          const isSubOpen = openSub === sub.id;
+                          return (
+                            <div key={sub.id}>
+                              <button
+                                onClick={() => toggleSub(sub.id)}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all mb-0.5 ${
+                                  subHasActive && !isSubOpen
+                                    ? 'text-brand-primary bg-brand-primary/5'
+                                    : isSubOpen
+                                    ? 'text-gray-800 bg-gray-50'
+                                    : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                              >
+                                <span className="flex-1 text-left">{sub.label}</span>
+                                <span className="text-[11px] text-gray-400 font-normal tabular-nums">{subVitrines.length}</span>
+                                <motion.div animate={{ rotate: isSubOpen ? 90 : 0 }} transition={{ duration: 0.15 }}>
+                                  <ChevronRight className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                                </motion.div>
+                              </button>
+                              <AnimatePresence initial={false}>
+                                {isSubOpen && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                                    className="overflow-hidden pl-2"
+                                  >
+                                    {subVitrines.map(v => <VitrineBtn key={v.id} vitrine={v} indent activeVitrineId={activeVitrineId} setActiveVitrineId={setActiveVitrineId} onClose={onClose} />)}
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          );
+                        })}
+
+                        {/* Direct vitrines (no sub) */}
+                        {directVitrines.map(v => <VitrineBtn key={v.id} vitrine={v} activeVitrineId={activeVitrineId} setActiveVitrineId={setActiveVitrineId} onClose={onClose} />)}
+                      </div>
+                    </motion.div>
                   )}
-                </>
-              )}
-
-              {/* ── Nível categoria ── */}
-              {drillCategory && !drillSub && activeCatData && (() => {
-                const subs: any[] = activeCatData.subs ?? [];
-                const subbedIds = subs.flatMap((s: any) => s.vitriIds as string[]);
-                const ungrouped = activeCatVitrines.filter(v => !subbedIds.includes(v.id));
-                return (
-                  <>
-
-                    {/* Subcategorias */}
-                    {subs.map((sub: any) => {
-                      const subVitrines = activeCatVitrines.filter(v => sub.vitriIds.includes(v.id));
-                      const hasActive = subVitrines.some(v => v.id === activeVitrineId);
-                      return (
-                        <button key={sub.id} onClick={() => goInto(drillCategory, sub.id)}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-0.5 ${
-                            hasActive ? 'text-brand-primary bg-brand-primary/5' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                          }`}
-                        >
-                          <span className="flex-1 text-left">{sub.label}</span>
-                          <span className="text-[10px] text-gray-400 font-normal mr-1">{subVitrines.length}</span>
-                          <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        </button>
-                      );
-                    })}
-
-                    {/* Vitrines sem subcategoria */}
-                    {subs.length > 0 && ungrouped.length > 0 && <div className="h-px bg-gray-100 mx-1 my-2" />}
-                    {ungrouped.map(v => <React.Fragment key={v.id}><VitrineBtn vitrine={v} /></React.Fragment>)}
-                  </>
-                );
-              })()}
-
-              {/* ── Nível subcategoria ── */}
-              {drillSub && activeSubData && (
-                <>
-                  {activeSubVitrines.map(v => <React.Fragment key={v.id}><VitrineBtn vitrine={v} /></React.Fragment>)}
-                </>
-              )}
-
-            </motion.div>
-          </AnimatePresence>
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </div>
       </motion.aside>
     </>
